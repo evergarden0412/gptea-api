@@ -1,1 +1,1 @@
-# gptea-api
+# gptea-server
