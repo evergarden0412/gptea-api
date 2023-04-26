@@ -1,0 +1,8 @@
+host: api.gptea-test.keenranger.dev
+info:
+  contact: {}
+  description: This is a sample server for GPTea API.
+  title: GPTea API
+  version: 0.1.0
+paths: {}
+swagger: "2.0"

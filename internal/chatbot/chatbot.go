@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/evergarden412/gptea-server/internal"
+	"github.com/evergarden0412/gptea-api/internal"
 	"github.com/sashabaranov/go-openai"
 )
 
