@@ -1,8 +1,202 @@
+definitions:
+  internal.Chat:
+    properties:
+      createdAt:
+        example: "2021-01-01T00:00:00Z"
+        type: string
+      id:
+        example: Hjejwerhj
+        type: string
+      name:
+        example: basic
+        type: string
+    type: object
+  internal.Message:
+    properties:
+      chatId:
+        example: Hjejwerhj
+        type: string
+      content:
+        type: string
+      createdAt:
+        type: string
+      seq:
+        description: seq starts from 1
+        example: 1
+        type: integer
+    type: object
+  internal.Scrapbook:
+    properties:
+      createdAt:
+        example: "2021-01-01T00:00:00Z"
+        type: string
+      id:
+        example: Hjejwerhj
+        type: string
+      name:
+        example: basic
+        type: string
+    type: object
+  server.chatsResponse:
+    properties:
+      chats:
+        items:
+          $ref: '#/definitions/internal.Chat'
+        type: array
+    type: object
+  server.errorResponse:
+    properties:
+      error:
+        example: error message
+        type: string
+    type: object
+  server.messageResponse:
+    properties:
+      message:
+        example: Hello, World!
+        type: string
+    type: object
+  server.messagesResponse:
+    properties:
+      messages:
+        items:
+          $ref: '#/definitions/internal.Message'
+        type: array
+    type: object
+  server.scrapbooksResponse:
+    properties:
+      scrapbooks:
+        items:
+          $ref: '#/definitions/internal.Scrapbook'
+        type: array
+    type: object
+  server.scrapsResponse:
+    properties:
+      scraps:
+        items:
+          $ref: '#/definitions/internal.Message'
+        type: array
+    type: object
 host: api.gptea-test.keenranger.dev
 info:
   contact: {}
   description: This is a sample server for GPTea API.
   title: GPTea API
   version: 0.1.0
-paths: {}
+paths:
+  /me/chats:
+    get:
+      description: Get my chats in descending order of created_at
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.chatsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Get my chats
+      tags:
+      - chats
+    post:
+      description: Post my chat
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/server.messageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Post my chat
+      tags:
+      - chats
+  /me/chats/:chatID/messages:
+    get:
+      description: Get my messages in descending order of created_at
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.messagesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Get my messages
+      tags:
+      - messages
+  /me/scrapbooks:
+    get:
+      description: Get my scrapbooks
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.scrapbooksResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Get my scrapbooks
+      tags:
+      - scraps
+  /me/scrapbooks/:scrapbookID/scraps:
+    get:
+      description: Get my scraps in descending order of created_at
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.scrapsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Get my scraps
+      tags:
+      - scraps
+securityDefinitions:
+  AccessTokenAuth:
+    description: type `Bearer {access_token}`
+    in: header
+    name: Authorization
+    type: apiKey
+  RefreshTokenAuth:
+    description: type `Bearer {refresh_token}`
+    in: header
+    name: X-Refresh-Token
+    type: apiKey
 swagger: "2.0"

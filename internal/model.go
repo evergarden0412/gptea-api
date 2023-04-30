@@ -3,29 +3,27 @@ package internal
 import "time"
 
 type Chat struct {
-	ID        string     `json:"id"`
-	Name      string     `json:"name"`
-	CreatedAt *time.Time `json:"createdAt"`
+	ID        string     `json:"id" example:"Hjejwerhj"`
+	Name      string     `json:"name" example:"basic"`
+	CreatedAt *time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
 }
 
-// pk: ChatID + Seq
+// pk is (chat_id, seq)
 type Message struct {
-	ChatID    string     `json:"chatID"`
-	Seq       int        `json:"seq"`
+	ChatID    string     `json:"chatId" example:"Hjejwerhj"`
+	Seq       int        `json:"seq" example:"1"` // seq starts from 1
 	Content   string     `json:"content"`
 	Role      string     `json:"-"`
 	CreatedAt *time.Time `json:"createdAt"`
 }
 
 type Scrapbook struct {
-	ID        string     `json:"id"`
-	UserID    string     `json:"userID"`
-	Name      string     `json:"name"`
-	CreatedAt *time.Time `json:"createdAt"`
+	ID        string     `json:"id" example:"Hjejwerhj"`
+	Name      string     `json:"name" example:"basic"`
+	CreatedAt *time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
 }
 
 type Scrap struct {
-	ScrapbookID string     `json:"scrapbookID"`
-	MessageID   string     `json:"messageID"`
-	CreatedAt   *time.Time `json:"createdAt"`
+	Memo      string     `json:"memo" example:"hello"`
+	CreatedAt *time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
 }

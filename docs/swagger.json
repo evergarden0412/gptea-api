@@ -7,5 +7,306 @@
         "version": "0.1.0"
     },
     "host": "api.gptea-test.keenranger.dev",
-    "paths": {}
+    "paths": {
+        "/me/chats": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Get my chats in descending order of created_at",
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Get my chats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.chatsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Post my chat",
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Post my chat",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/server.messageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/chats/:chatID/messages": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Get my messages in descending order of created_at",
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Get my messages",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.messagesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/scrapbooks": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Get my scrapbooks",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "Get my scrapbooks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.scrapbooksResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/scrapbooks/:scrapbookID/scraps": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Get my scraps in descending order of created_at",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "Get my scraps",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.scrapsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "internal.Chat": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2021-01-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "Hjejwerhj"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "basic"
+                }
+            }
+        },
+        "internal.Message": {
+            "type": "object",
+            "properties": {
+                "chatId": {
+                    "type": "string",
+                    "example": "Hjejwerhj"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "seq": {
+                    "description": "seq starts from 1",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "internal.Scrapbook": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2021-01-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "Hjejwerhj"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "basic"
+                }
+            }
+        },
+        "server.chatsResponse": {
+            "type": "object",
+            "properties": {
+                "chats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal.Chat"
+                    }
+                }
+            }
+        },
+        "server.errorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "error message"
+                }
+            }
+        },
+        "server.messageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Hello, World!"
+                }
+            }
+        },
+        "server.messagesResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal.Message"
+                    }
+                }
+            }
+        },
+        "server.scrapbooksResponse": {
+            "type": "object",
+            "properties": {
+                "scrapbooks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal.Scrapbook"
+                    }
+                }
+            }
+        },
+        "server.scrapsResponse": {
+            "type": "object",
+            "properties": {
+                "scraps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal.Message"
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "AccessTokenAuth": {
+            "description": "type `Bearer {access_token}`",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        },
+        "RefreshTokenAuth": {
+            "description": "type `Bearer {refresh_token}`",
+            "type": "apiKey",
+            "name": "X-Refresh-Token",
+            "in": "header"
+        }
+    }
 }
