@@ -94,6 +94,15 @@ const docTemplate = `{
                     "messages"
                 ],
                 "summary": "Get my messages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "chatID",
+                        "name": "chatID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -162,6 +171,15 @@ const docTemplate = `{
                     "scraps"
                 ],
                 "summary": "Get my scraps",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scrapbookID",
+                        "name": "scrapbookID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -206,7 +224,7 @@ const docTemplate = `{
         "internal.Message": {
             "type": "object",
             "properties": {
-                "chatId": {
+                "chatID": {
                     "type": "string",
                     "example": "Hjejwerhj"
                 },

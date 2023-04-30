@@ -89,6 +89,9 @@ func (s *Server) handleGetMyChats(c *gin.Context) {
 			CreatedAt: &sampleTime2,
 		},
 	}
+	sort.Slice(someSampleChats, func(i, j int) bool {
+		return someSampleChats[i].CreatedAt.After(*someSampleChats[j].CreatedAt)
+	})
 	c.JSON(http.StatusOK, chatsResponse{Chats: someSampleChats})
 }
 
@@ -112,6 +115,7 @@ type messagesResponse struct {
 // handleGetMyMessages godoc
 // @Summary Get my messages
 // @Description Get my messages in descending order of created_at
+// @Param chatID path string true "chatID"
 // @Security AccessTokenAuth
 // @Success 200 {object} messagesResponse
 // @Failure 400 {object} errorResponse
@@ -142,6 +146,9 @@ func (s *Server) handleGetMyMessages(c *gin.Context) {
 			CreatedAt: &sampleTime2,
 		},
 	}
+	sort.Slice(someSampleMessages, func(i, j int) bool {
+		return someSampleMessages[i].Seq > someSampleMessages[j].Seq
+	})
 	c.JSON(http.StatusOK, messagesResponse{Messages: someSampleMessages})
 }
 
@@ -175,6 +182,7 @@ type scrapsResponse struct {
 // handleGetMyScraps godoc
 // @Summary Get my scraps
 // @Description Get my scraps in descending order of created_at
+// @Param scrapbookID path string true "scrapbookID"
 // @Security AccessTokenAuth
 // @Success 200 {object} scrapsResponse
 // @Failure 400 {object} errorResponse

@@ -10,7 +10,7 @@ type Chat struct {
 
 // pk is (chat_id, seq)
 type Message struct {
-	ChatID    string     `json:"chatId" example:"Hjejwerhj"`
+	ChatID    string     `json:"chatID" example:"Hjejwerhj"`
 	Seq       int        `json:"seq" example:"1"` // seq starts from 1
 	Content   string     `json:"content"`
 	Role      string     `json:"-"`

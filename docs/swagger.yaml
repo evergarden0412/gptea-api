@@ -13,7 +13,7 @@ definitions:
     type: object
   internal.Message:
     properties:
-      chatId:
+      chatID:
         example: Hjejwerhj
         type: string
       content:
@@ -128,6 +128,12 @@ paths:
   /me/chats/:chatID/messages:
     get:
       description: Get my messages in descending order of created_at
+      parameters:
+      - description: chatID
+        in: path
+        name: chatID
+        required: true
+        type: string
       responses:
         "200":
           description: OK
@@ -170,6 +176,12 @@ paths:
   /me/scrapbooks/:scrapbookID/scraps:
     get:
       description: Get my scraps in descending order of created_at
+      parameters:
+      - description: scrapbookID
+        in: path
+        name: scrapbookID
+        required: true
+        type: string
       responses:
         "200":
           description: OK
