@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Mappings:
+  FunctionMap:
+    SG:
+      test: sg-0e25fdf0f98b96de3
+      prod: sg-0628eccf44915c5fe
+    SubnetA:
+      test: subnet-0488dd94a906b5fdd
+      prod: subnet-03cf3dc17841e83db
+    SubnetC:
+      test: subnet-062b8cfc24b8e705c
+      prod: subnet-017cfeee9d976ae10
+    Domain:
+      test: api.gptea-test.keenranger.dev
+      prod: api.gptea.keenranger.dev
+    HostedZone:
+      test: gptea-test.keenranger.dev.
+      prod: gptea.keenranger.dev.
+    Cert:
+      test: arn:aws:acm:ap-northeast-2:596852339475:certificate/57b760f7-c34e-400f-927b-2a77182419da
+      prod: arn:aws:acm:ap-northeast-2:596852339475:certificate/55691e5a-20e4-4e96-9c1e-dbf4c395ff61
+Parameters:
+  Env:
+    Default: test
+    Type: String
+    AllowedValues:
+      - test
+      - prod
+    Description: Environment in which application will be deployed
+Globals:
+  Function:
+    VpcConfig:
+      SecurityGroupIds:
+        - !FindInMap [FunctionMap, SG, !Ref Env]
+      SubnetIds:
+        - !FindInMap [FunctionMap, SubnetA, !Ref Env]
+        - !FindInMap [FunctionMap, SubnetC, !Ref Env]
+    Environment:
+      Variables:
+        ENV: !Ref Env
+        ACCESS_TOKEN_TTL: 168h
+        REFRESH_TOKEN_TTL: 168h
+        REGION: !Ref "AWS::Region"
+Resources:
+  GPTeaAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Env
+      Domain:
+        CertificateArn: !FindInMap [FunctionMap, Cert, !Ref Env] 
+        DomainName: !FindInMap [FunctionMap, Domain, !Ref Env]
+        Route53:
+          HostedZoneName: !FindInMap [FunctionMap, HostedZone, !Ref Env] 
+  GPTeaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+      Events:
+        ProxyAPIEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref GPTeaAPI 
+            Path: /{proxy+}
+            Method: any
+      Runtime: provided.al2
+      CodeUri: .
+      Architectures:
+        - arm64
+      Handler: main
+    Metadata:
+      BuildMethod: makefile
