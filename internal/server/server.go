@@ -8,16 +8,24 @@ import (
 
 	_ "github.com/evergarden0412/gptea-api/docs"
 	"github.com/evergarden0412/gptea-api/internal"
+	"github.com/evergarden0412/gptea-api/internal/auth"
+	"github.com/evergarden0412/gptea-api/internal/postgres"
 	"github.com/gin-gonic/gin"
+	"github.com/kataras/golog"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
 
 type Server struct {
+	a  *auth.Authenticator
+	db *postgres.DB
 }
 
-func New() *Server {
-	return &Server{}
+func New(a *auth.Authenticator, db *postgres.DB) *Server {
+	return &Server{
+		a:  a,
+		db: db,
+	}
 }
 
 type messageResponse struct {
@@ -39,13 +47,20 @@ type errorResponse struct {
 // @securityDefinitions.apikey RefreshTokenAuth
 // @in header
 // @name X-Refresh-Token
-// @description type `Bearer {refresh_token}`
+// @description type `{refresh_token}`
 func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRoutes) {
 	handle("GET", "/ping2", s.handlePing)
-	handle("GET", "/me/chats", s.handleGetMyChats)
-	handle("GET", "/me/chats/:chatID/messages", s.handleGetMyMessages)
-	handle("GET", "/me/scrapbooks", s.handleGetMyScrapbooks)
-	handle("GET", "/me/scrapbooks/:scrapbookID/scraps", s.handleGetMyScraps)
+	handle("POST", "/auth/cred/oauth/token")
+	handle("POST", "/auth/cred/register", s.handleRegister)
+	handle("POST", "/auth/cred/sign-in", s.handleSignIn)
+	handle("GET", "/token/verify")
+	handle("POST", "/token/refresh")
+	handle("GET", "/me/chats", s.ensureUser, s.handleGetMyChats)
+	handle("POST", "/me/chats", s.ensureUser, s.handlePostMyChat)
+	handle("GET", "/me/chats/:chatID/messages", s.ensureUser, s.handleGetMyMessages)
+	handle("GET", "/me/scrapbooks", s.ensureUser, s.handleGetMyScrapbooks)
+	handle("GET", "/me/scrapbooks/:scrapbookID/scraps", s.ensureUser, s.handleGetMyScraps)
+	handle("DELETE", "/me/scrapbooks/", s.ensureUser)
 	if os.Getenv("ENV") != "prod" {
 		handle("GET", "/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
@@ -64,48 +79,60 @@ type chatsResponse struct {
 // @Description Get my chats in descending order of created_at
 // @Security AccessTokenAuth
 // @Success 200 {object} chatsResponse
-// @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Router /me/chats [get]
 // @tags chats
-func (s *Server) handleGetMyChats(c *gin.Context) {
-	sampleTime0 := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
-	sampleTime1 := time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)
-	sampleTime2 := time.Date(2021, 1, 3, 0, 0, 0, 0, time.UTC)
-	someSampleChats := []internal.Chat{
-		{
-			ID:        "1",
-			Name:      "chat1",
-			CreatedAt: &sampleTime0,
-		},
-		{
-			ID:        "2",
-			Name:      "chat2",
-			CreatedAt: &sampleTime1,
-		},
-		{
-			ID:        "3",
-			Name:      "chat3",
-			CreatedAt: &sampleTime2,
-		},
+func (s *Server) handleGetMyChats(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+
+	chats, err := s.db.SelectChats(ctx, userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		golog.Error("handleGetMyChats: select chats: ", err)
+		return
 	}
-	sort.Slice(someSampleChats, func(i, j int) bool {
-		return someSampleChats[i].CreatedAt.After(*someSampleChats[j].CreatedAt)
-	})
-	c.JSON(http.StatusOK, chatsResponse{Chats: someSampleChats})
+	chatsForResp := make([]internal.Chat, len(chats))
+	copy(chatsForResp, chats)
+
+	ctx.JSON(http.StatusOK, chatsResponse{Chats: chatsForResp})
+}
+
+type chatBody struct {
+	Name string `json:"name"`
 }
 
 // handlePostMyChat godoc
 // @Summary Post my chat
 // @Description Post my chat
+// @Param body body chatBody true "body"
 // @Security AccessTokenAuth
 // @Success 201 {object} messageResponse
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Router /me/chats [post]
 // @tags chats
-func (s *Server) handlePostMyChat(c *gin.Context) {
-	c.JSON(http.StatusCreated, messageResponse{Message: "pong"})
+func (s *Server) handlePostMyChat(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+	var body chatBody
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
+		golog.Error("handlePostMyChat: bind json: ", err)
+		return
+	}
+
+	chat, err := internal.NewChat()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		golog.Error("handlePostMyChat: new chat: ", err)
+		return
+	}
+	if err := s.db.InsertChat(ctx, userID, *chat); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		golog.Error("handlePostMyChat: insert chat: ", err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, messageResponse{Message: "ok"})
 }
 
 type messagesResponse struct {
