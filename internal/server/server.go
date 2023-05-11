@@ -126,6 +126,8 @@ func (s *Server) handlePostMyChat(ctx *gin.Context) {
 		golog.Error("handlePostMyChat: new chat: ", err)
 		return
 	}
+	chat.Name = body.Name
+
 	if err := s.db.InsertChat(ctx, userID, *chat); err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		golog.Error("handlePostMyChat: insert chat: ", err)

@@ -3,13 +3,13 @@
     "_id": "7477dcf5-83d8-4dc7-9665-39c11abab267",
     "name": "local",
     "default": true,
-    "sortNum": 5000,
+    "sortNum": 2500,
     "created": "2023-05-11T02:30:09.557Z",
     "modified": "2023-05-11T02:30:09.557Z",
     "data": [
       {
         "name": "kakaoAccessToken",
-        "value": "oa9WAyn-GC49ckVGdKtWZlmRo_HHe9ANUcfbXJX4CisM0gAAAYgIpMZn"
+        "value": "asd"
       },
       {
         "name": "baseURL",

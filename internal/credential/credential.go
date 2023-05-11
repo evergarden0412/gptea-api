@@ -28,6 +28,7 @@ const (
 
 var (
 	ErrUnknownProvider = fmt.Errorf("unknown provider")
+	ErrFailedVerify    = fmt.Errorf("failed verify")
 )
 
 func New(provider string) (Credential, error) {
@@ -69,14 +70,14 @@ func (c *naverCredential) Verify(ctx context.Context, token string) (VerifyResul
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return VerifyResult{}, err
+		return VerifyResult{}, ErrFailedVerify
 	}
 	var naverProfile naverProfileResponse
 	if err := json.NewDecoder(resp.Body).Decode(&naverProfile); err != nil {
 		return VerifyResult{}, err
 	}
 	if naverProfile.Response.ID == "" {
-		return VerifyResult{}, err
+		return VerifyResult{}, ErrFailedVerify
 	}
 	return VerifyResult{
 		CredentialProvider: ProviderNaver,
@@ -102,14 +103,14 @@ func (c *kakaoCredential) Verify(ctx context.Context, token string) (VerifyResul
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return VerifyResult{}, err
+		return VerifyResult{}, ErrFailedVerify
 	}
 	var kakaoProfile kakaoProfileResponse
 	if err := json.NewDecoder(resp.Body).Decode(&kakaoProfile); err != nil {
 		return VerifyResult{}, err
 	}
 	if kakaoProfile.ID == 0 {
-		return VerifyResult{}, err
+		return VerifyResult{}, ErrFailedVerify
 	}
 	return VerifyResult{
 		CredentialProvider: ProviderKakao,

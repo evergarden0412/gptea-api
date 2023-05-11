@@ -1,12 +1,12 @@
 create table if not exists users(
-    id text primary key,
+    id text primary key not null,
     created_at timestamptz default now()
 );
 
 create table if not exists user_credentials(
-    user_id text references users(id),
-    credential_type text,
-    credential_id text,
+    user_id text references users(id) not null,
+    credential_type text not null,
+    credential_id text not null,
     created_at timestamptz default now(),
     primary key (credential_type, credential_id)
 );

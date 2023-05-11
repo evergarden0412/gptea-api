@@ -8,7 +8,7 @@
     "method": "POST",
     "sortNum": 20000,
     "created": "2023-05-11T02:31:20.231Z",
-    "modified": "2023-05-11T02:33:04.007Z",
+    "modified": "2023-05-11T05:47:40.443Z",
     "headers": [],
     "params": [],
     "body": {
@@ -27,12 +27,12 @@
     "method": "POST",
     "sortNum": 30000,
     "created": "2023-05-11T02:32:29.896Z",
-    "modified": "2023-05-11T02:33:08.020Z",
+    "modified": "2023-05-11T05:47:42.743Z",
     "headers": [],
     "params": [],
     "body": {
       "type": "json",
-      "raw": "{\n  \"cred\": \"kakao\",\n  \"accessToken\": \"{{kakaoAccessToken}}\"\n}",
+      "raw": "{\n  \"cred\": \"naver\",\n  \"accessToken\": \"{{kakaoAccessToken}}\"\n}",
       "form": []
     },
     "tests": []

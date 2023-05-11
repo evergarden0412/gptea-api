@@ -2,8 +2,12 @@ package config
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/gin-gonic/gin"
 	"github.com/kataras/golog"
 )
@@ -22,10 +26,13 @@ type Config struct {
 }
 
 type PostgresSecret struct {
-	Host     string `json:"host"`
-	Port     string `json:"port"`
 	User     string `json:"username"`
 	Password string `json:"password"`
+}
+
+type HMACSecret struct {
+	AccessTokenKey  string `json:"accessTokenKey"`
+	RefreshTokenKey string `json:"refreshTokenKey"`
 }
 
 func Init(ctx context.Context) (*Config, error) {
@@ -51,5 +58,55 @@ func Init(ctx context.Context) (*Config, error) {
 		cfg.DBPassword = "password"
 		return cfg, nil
 	}
+	cfg.AccessTokenTTL = os.Getenv("ACCESS_TOKEN_TTL")
+	cfg.RefreshTokenTTL = os.Getenv("REFRESH_TOKEN_TTL")
+	cfg.DBHost = os.Getenv("DB_HOST")
+	cfg.DBPort = os.Getenv("DB_PORT")
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(cfg.Region),
+	})
+	secretsManager := secretsmanager.New(sess)
+
+	postgresInput := &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(os.Getenv("DB_SECRET_ARN")),
+	}
+	postgresOutput, err := secretsManager.GetSecretValue(postgresInput)
+	if err != nil {
+		return nil, err
+	}
+	var postgresString string
+	if postgresOutput.SecretString != nil {
+		postgresString = *postgresOutput.SecretString
+	} else {
+		postgresString = string(postgresOutput.SecretBinary)
+	}
+	var postgresSecret PostgresSecret
+	if err := json.Unmarshal([]byte(postgresString), &postgresSecret); err != nil {
+		return nil, err
+	}
+
+	hmacInput := &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(os.Getenv("HMAC_SECRET_ARN")),
+	}
+	hmacOutput, err := secretsManager.GetSecretValue(hmacInput)
+	if err != nil {
+		return nil, err
+	}
+	var hmacString string
+	if hmacOutput.SecretString != nil {
+		hmacString = *hmacOutput.SecretString
+	} else {
+		hmacString = string(hmacOutput.SecretBinary)
+	}
+	var hmacSecret HMACSecret
+	if err := json.Unmarshal([]byte(hmacString), &hmacSecret); err != nil {
+		return nil, err
+	}
+
+	cfg.DBUser = postgresSecret.User
+	cfg.DBPassword = postgresSecret.Password
+	cfg.AccessTokenKey = hmacSecret.AccessTokenKey
+	cfg.RefreshTokenKey = hmacSecret.RefreshTokenKey
 	return cfg, nil
 }

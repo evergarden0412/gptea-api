@@ -1,6 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Mappings:
+  EnvMap:
+    DBHost:
+      test: gptea-test-instance-1.cdkmn8yg5hzw.ap-northeast-2.rds.amazonaws.com
+      prod: gptea-instance-1.cdkmn8yg5hzw.ap-northeast-2.rds.amazonaws.com
+    DBSecretARN:
+      test: arn:aws:secretsmanager:ap-northeast-2:596852339475:secret:rds!cluster-a8dda95e-d938-49d8-9047-6a7a0309606a-EsXrpO
+      prod: arn:aws:secretsmanager:ap-northeast-2:596852339475:secret:rds!cluster-3ac6b2b9-422c-4271-b239-de44854b439b-iDvc1n
+    HMACSecretARN:
+      test: arn:aws:secretsmanager:ap-northeast-2:596852339475:secret:gptea/test/hmac-Xfs7m3
+      prod: arn:aws:secretsmanager:ap-northeast-2:596852339475:secret:gptea/prod/hmac-LNZlwj
   FunctionMap:
     SG:
       test: sg-0e25fdf0f98b96de3
@@ -42,6 +52,10 @@ Globals:
         ACCESS_TOKEN_TTL: 2h
         REFRESH_TOKEN_TTL: 168h
         REGION: !Ref "AWS::Region"
+        DB_HOST: !FindInMap [EnvMap, DBHost, !Ref Env]
+        DB_PORT: 5432
+        DB_SECRET_ARN: !FindInMap [EnvMap, DBSecretARN, !Ref Env]
+        HMAC_SECRET_ARN: !FindInMap [EnvMap, HMACSecretARN, !Ref Env]
 Resources:
   GPTeaAPI:
     Type: AWS::Serverless::Api
@@ -56,6 +70,10 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !FindInMap [EnvMap, DBSecretARN, !Ref Env]
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !FindInMap [EnvMap, HMACSecretARN, !Ref Env]
         - AWSLambdaVPCAccessExecutionRole
       Events:
         ProxyAPIEvent:
