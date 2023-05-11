@@ -9,6 +9,8 @@ require (
 	github.com/awslabs/aws-lambda-go-api-proxy v0.14.0
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.0
+	github.com/kataras/golog v0.1.7
+	github.com/lib/pq v1.10.9
 	github.com/sashabaranov/go-openai v1.5.7
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
@@ -32,6 +34,7 @@ require (
 	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kataras/pio v0.0.10 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

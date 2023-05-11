@@ -4,7 +4,7 @@ create table if not exists users(
 );
 
 create table if not exists user_credentials(
-    user_id text,
+    user_id text references users(id),
     credential_type text,
     credential_id text,
     created_at timestamptz default now(),
@@ -13,6 +13,7 @@ create table if not exists user_credentials(
 
 create table if not exists chats(
     id text primary key,
+    user_id text references users(id),
     name text,
     created_at timestamptz default now()
 );
