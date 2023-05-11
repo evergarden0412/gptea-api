@@ -20,30 +20,26 @@ type tokenHeader struct {
 func (s *Server) ensureUser(ctx *gin.Context) {
 	var header tokenHeader
 	if err := ctx.ShouldBindHeader(&header); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
 		golog.Error("ensureUser: bind header:", err)
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
 		return
 	}
 	atStr, found := strings.CutPrefix(header.Authorization, "Bearer ")
 	if !found {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse{Error: "no bearer prefix"})
 		golog.Error("ensureUser: cut prefix: not found")
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse{Error: "no bearer prefix"})
 		return
 	}
 	if atStr == "" {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse{Error: "no access token"})
 		golog.Error("ensureUser: no access token")
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse{Error: "no access token"})
 		return
 	}
 
 	at, err := s.a.VerifyAccessToken(atStr)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse{Error: err.Error()})
 		golog.Error("ensureUser: verify access token:", err)
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
 		return
 	}
 

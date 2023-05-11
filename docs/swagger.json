@@ -76,6 +76,77 @@
                 }
             }
         },
+        "/auth/token/refresh": {
+            "post": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    },
+                    {
+                        "RefreshTokenAuth": []
+                    }
+                ],
+                "description": "Refresh a token",
+                "tags": [
+                    "token"
+                ],
+                "summary": "Refresh a tokenq",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.signInHandlerOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/token/verify": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Verify a accesstoken",
+                "tags": [
+                    "token"
+                ],
+                "summary": "Verify a token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.tokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/me/chats": {
             "get": {
                 "security": [
@@ -419,19 +490,36 @@
                     "type": "string"
                 }
             }
+        },
+        "server.tokenResponse": {
+            "type": "object",
+            "properties": {
+                "exp": {
+                    "type": "string"
+                },
+                "iat": {
+                    "type": "string"
+                },
+                "jti": {
+                    "type": "string"
+                },
+                "sub": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
         "AccessTokenAuth": {
             "description": "type `Bearer {access_token}`",
             "type": "apiKey",
-            "name": "Authorization",
+            "name": "authorization",
             "in": "header"
         },
         "RefreshTokenAuth": {
             "description": "type `{refresh_token}`",
             "type": "apiKey",
-            "name": "X-Refresh-Token",
+            "name": "x-refresh-token",
             "in": "header"
         }
     }

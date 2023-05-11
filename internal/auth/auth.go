@@ -11,6 +11,7 @@ import (
 
 var (
 	ErrInvalidSignMethod = errors.New("invalid signing method")
+	ErrTokensNotMatch    = errors.New("tokens not match")
 )
 
 type AccessToken struct {
@@ -130,4 +131,21 @@ func (a *Authenticator) VerifyRefreshToken(token string) (RefreshToken, error) {
 		return RefreshToken{}, err
 	}
 	return rt, nil
+}
+
+func (a *Authenticator) RefreshAccessToken(accessToken AccessToken, refreshToken RefreshToken) (AccessToken, RefreshToken, error) {
+	if accessToken.ID != refreshToken.AccessTokenID {
+		return AccessToken{}, RefreshToken{}, ErrTokensNotMatch
+	}
+
+	newAT, err := a.IssueAccessToken(accessToken.Subject)
+	if err != nil {
+		return AccessToken{}, RefreshToken{}, err
+	}
+	newRT, err := a.IssueRefreshToken(newAT.ID)
+	if err != nil {
+		return AccessToken{}, RefreshToken{}, err
+	}
+
+	return newAT, newRT, nil
 }

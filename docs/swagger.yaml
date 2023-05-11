@@ -100,6 +100,17 @@ definitions:
       refreshToken:
         type: string
     type: object
+  server.tokenResponse:
+    properties:
+      exp:
+        type: string
+      iat:
+        type: string
+      jti:
+        type: string
+      sub:
+        type: string
+    type: object
 host: api.gptea-test.keenranger.dev
 info:
   contact: {}
@@ -151,6 +162,49 @@ paths:
       summary: Sign in with a credential
       tags:
       - auth
+  /auth/token/refresh:
+    post:
+      description: Refresh a token
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.signInHandlerOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      - RefreshTokenAuth: []
+      summary: Refresh a tokenq
+      tags:
+      - token
+  /auth/token/verify:
+    get:
+      description: Verify a accesstoken
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Verify a token
+      tags:
+      - token
   /me/chats:
     get:
       description: Get my chats in descending order of created_at
@@ -274,11 +328,11 @@ securityDefinitions:
   AccessTokenAuth:
     description: type `Bearer {access_token}`
     in: header
-    name: Authorization
+    name: authorization
     type: apiKey
   RefreshTokenAuth:
     description: type `{refresh_token}`
     in: header
-    name: X-Refresh-Token
+    name: x-refresh-token
     type: apiKey
 swagger: "2.0"

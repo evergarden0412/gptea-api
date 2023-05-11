@@ -42,19 +42,19 @@ type errorResponse struct {
 // @host api.gptea-test.keenranger.dev
 // @securityDefinitions.apikey AccessTokenAuth
 // @in header
-// @name Authorization
+// @name authorization
 // @description type `Bearer {access_token}`
 // @securityDefinitions.apikey RefreshTokenAuth
 // @in header
-// @name X-Refresh-Token
+// @name x-refresh-token
 // @description type `{refresh_token}`
 func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRoutes) {
 	handle("GET", "/ping2", s.handlePing)
 	handle("POST", "/auth/cred/oauth/token")
 	handle("POST", "/auth/cred/register", s.handleRegister)
 	handle("POST", "/auth/cred/sign-in", s.handleSignIn)
-	handle("GET", "/token/verify")
-	handle("POST", "/token/refresh")
+	handle("GET", "/auth/token/verify", s.handleVerifyToken)
+	handle("POST", "/auth/token/refresh", s.handleRefreshToken)
 	handle("GET", "/me/chats", s.ensureUser, s.handleGetMyChats)
 	handle("POST", "/me/chats", s.ensureUser, s.handlePostMyChat)
 	handle("GET", "/me/chats/:chatID/messages", s.ensureUser, s.handleGetMyMessages)
