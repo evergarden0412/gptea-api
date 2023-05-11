@@ -33,18 +33,18 @@ var (
 func New(provider string) (Credential, error) {
 	switch provider {
 	case ProviderNaver:
-		return &NaverCredential{}, nil
+		return &naverCredential{}, nil
 	case ProviderKakao:
-		return &KakaoCredential{}, nil
+		return &kakaoCredential{}, nil
 	default:
 		return nil, ErrUnknownProvider
 	}
 }
 
-type NaverCredential struct {
+type naverCredential struct {
 }
 
-type KakaoCredential struct {
+type kakaoCredential struct {
 }
 
 type naverProfileResponse struct {
@@ -57,7 +57,7 @@ type naverProfileResponse struct {
 
 const naverProfileURL = "https://openapi.naver.com/v1/nid/me"
 
-func (c *NaverCredential) Verify(ctx context.Context, token string) (VerifyResult, error) {
+func (c *naverCredential) Verify(ctx context.Context, token string) (VerifyResult, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, naverProfileURL, nil)
 	if err != nil {
 		return VerifyResult{}, err
@@ -90,7 +90,7 @@ type kakaoProfileResponse struct {
 
 const kakaoProfileURL = "https://kapi.kakao.com/v2/user/me"
 
-func (c *KakaoCredential) Verify(ctx context.Context, token string) (VerifyResult, error) {
+func (c *kakaoCredential) Verify(ctx context.Context, token string) (VerifyResult, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, kakaoProfileURL, nil)
 	if err != nil {
 		return VerifyResult{}, err
