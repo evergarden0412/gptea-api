@@ -1,0 +1,106 @@
+[
+  {
+    "_id": "92d14d51-372c-4a59-84d8-df1758202391",
+    "colId": "60f01402-0b2f-4547-b57d-fe4aa0365be7",
+    "containerId": "",
+    "name": "kakaoSignin",
+    "url": "/auth/cred/sign-in",
+    "method": "POST",
+    "sortNum": 20000,
+    "created": "2023-05-11T02:31:20.231Z",
+    "modified": "2023-05-11T02:33:04.007Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"cred\": \"kakao\",\n  \"accessToken\": \"{{kakaoAccessToken}}\"\n}",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "ca17d3e8-f83b-4ac3-85cb-e1da1e86416f",
+    "colId": "60f01402-0b2f-4547-b57d-fe4aa0365be7",
+    "containerId": "",
+    "name": "register",
+    "url": "/auth/cred/register",
+    "method": "POST",
+    "sortNum": 30000,
+    "created": "2023-05-11T02:32:29.896Z",
+    "modified": "2023-05-11T02:33:08.020Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"cred\": \"kakao\",\n  \"accessToken\": \"{{kakaoAccessToken}}\"\n}",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "79eba237-6bf8-4415-ae26-850e5682a08c",
+    "colId": "60f01402-0b2f-4547-b57d-fe4aa0365be7",
+    "containerId": "",
+    "name": "kakaoSignin",
+    "url": "/auth/cred/sign-in",
+    "method": "POST",
+    "sortNum": 40000,
+    "created": "2023-05-11T02:32:31.223Z",
+    "modified": "2023-05-11T02:33:15.044Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"cred\": \"kakao\",\n  \"accessToken\": \"{{kakaoAccessToken}}\"\n}",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "130f5e06-dbc9-412e-8250-80ca8eda5422",
+    "colId": "04fd46a7-1e0e-4978-a865-b044e0c935b0",
+    "containerId": "",
+    "name": "get chat",
+    "url": "/me/chats",
+    "method": "GET",
+    "sortNum": 10000,
+    "created": "2023-05-11T02:53:31.796Z",
+    "modified": "2023-05-11T02:54:11.808Z",
+    "headers": [],
+    "params": [],
+    "tests": []
+  },
+  {
+    "_id": "80c3ed2d-d889-4bff-b6ce-acbfe94ec67e",
+    "colId": "04fd46a7-1e0e-4978-a865-b044e0c935b0",
+    "containerId": "",
+    "name": "post chat",
+    "url": "/me/chats",
+    "method": "POST",
+    "sortNum": 20000,
+    "created": "2023-05-11T02:54:14.029Z",
+    "modified": "2023-05-11T03:00:23.469Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"name\": \"\"\n}",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "9be46d84-9931-4b6a-aa88-de2a4e415ac2",
+    "colId": "04fd46a7-1e0e-4978-a865-b044e0c935b0",
+    "containerId": "",
+    "name": "get chat",
+    "url": "/me/chats",
+    "method": "GET",
+    "sortNum": 30000,
+    "created": "2023-05-11T02:54:15.409Z",
+    "modified": "2023-05-11T02:54:15.409Z",
+    "headers": [],
+    "params": [],
+    "tests": []
+  }
+]

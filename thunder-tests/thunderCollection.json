@@ -1,0 +1,30 @@
+[
+  {
+    "_id": "60f01402-0b2f-4547-b57d-fe4aa0365be7",
+    "colName": "cred",
+    "created": "2023-05-11T02:30:38.231Z",
+    "sortNum": 10000,
+    "folders": [],
+    "settings": {
+      "options": {
+        "baseUrl": "{{baseURL}}"
+      }
+    }
+  },
+  {
+    "_id": "04fd46a7-1e0e-4978-a865-b044e0c935b0",
+    "colName": "chat",
+    "created": "2023-05-11T02:53:23.198Z",
+    "sortNum": 20000,
+    "folders": [],
+    "settings": {
+      "auth": {
+        "type": "bearer",
+        "bearer": "{{accessToken}}"
+      },
+      "options": {
+        "baseUrl": "{{baseURL}}"
+      }
+    }
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "_id": "7477dcf5-83d8-4dc7-9665-39c11abab267",
+    "name": "local",
+    "default": true,
+    "sortNum": 5000,
+    "created": "2023-05-11T02:30:09.557Z",
+    "modified": "2023-05-11T02:30:09.557Z",
+    "data": [
+      {
+        "name": "kakaoAccessToken",
+        "value": "oa9WAyn-GC49ckVGdKtWZlmRo_HHe9ANUcfbXJX4CisM0gAAAYgIpMZn"
+      },
+      {
+        "name": "baseURL",
+        "value": "localhost:8080"
+      },
+      {
+        "name": "accessToken",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyRkpDWVlCRFcyR01UV0w0RTczVFdZU0QiLCJleHAiOjE2ODM3NzQ1NzUsImlhdCI6MTY4Mzc3NDI3NSwianRpIjoiVFpubDl3SlMxREsrL3hnZGNyUGUifQ.PFp3Y607j3Pzfr53gvVxMW3Xrp1_SARP_FFKwmQVjPI"
+      }
+    ]
+  }
+]
