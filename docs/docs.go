@@ -16,6 +16,74 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/cred/register": {
+            "post": {
+                "description": "Register a credential",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register a credential",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.credBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/server.messageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/cred/sign-in": {
+            "post": {
+                "description": "Sign in with a credential",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign in with a credential",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.credBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.signInHandlerOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/me/chats": {
             "get": {
                 "security": [
@@ -33,12 +101,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/server.chatsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.errorResponse"
                         }
                     },
                     "500": {
@@ -60,6 +122,17 @@ const docTemplate = `{
                     "chats"
                 ],
                 "summary": "Post my chat",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.chatBody"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -258,6 +331,14 @@ const docTemplate = `{
                 }
             }
         },
+        "server.chatBody": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "server.chatsResponse": {
             "type": "object",
             "properties": {
@@ -266,6 +347,22 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/internal.Chat"
                     }
+                }
+            }
+        },
+        "server.credBody": {
+            "type": "object",
+            "required": [
+                "accessToken",
+                "cred"
+            ],
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "cred": {
+                    "type": "string",
+                    "example": "naver"
                 }
             }
         },
@@ -319,6 +416,17 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "server.signInHandlerOutput": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -329,7 +437,7 @@ const docTemplate = `{
             "in": "header"
         },
         "RefreshTokenAuth": {
-            "description": "type ` + "`" + `Bearer {refresh_token}` + "`" + `",
+            "description": "type ` + "`" + `{refresh_token}` + "`" + `",
             "type": "apiKey",
             "name": "X-Refresh-Token",
             "in": "header"

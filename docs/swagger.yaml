@@ -37,12 +37,28 @@ definitions:
         example: basic
         type: string
     type: object
+  server.chatBody:
+    properties:
+      name:
+        type: string
+    type: object
   server.chatsResponse:
     properties:
       chats:
         items:
           $ref: '#/definitions/internal.Chat'
         type: array
+    type: object
+  server.credBody:
+    properties:
+      accessToken:
+        type: string
+      cred:
+        example: naver
+        type: string
+    required:
+    - accessToken
+    - cred
     type: object
   server.errorResponse:
     properties:
@@ -77,6 +93,13 @@ definitions:
           $ref: '#/definitions/internal.Message'
         type: array
     type: object
+  server.signInHandlerOutput:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
 host: api.gptea-test.keenranger.dev
 info:
   contact: {}
@@ -84,6 +107,50 @@ info:
   title: GPTea API
   version: 0.1.0
 paths:
+  /auth/cred/register:
+    post:
+      description: Register a credential
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/server.credBody'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/server.messageResponse'
+      summary: Register a credential
+      tags:
+      - auth
+  /auth/cred/sign-in:
+    post:
+      description: Sign in with a credential
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/server.credBody'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.signInHandlerOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      summary: Sign in with a credential
+      tags:
+      - auth
   /me/chats:
     get:
       description: Get my chats in descending order of created_at
@@ -92,10 +159,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/server.chatsResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.errorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -107,6 +170,13 @@ paths:
       - chats
     post:
       description: Post my chat
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/server.chatBody'
       responses:
         "201":
           description: Created
@@ -207,7 +277,7 @@ securityDefinitions:
     name: Authorization
     type: apiKey
   RefreshTokenAuth:
-    description: type `Bearer {refresh_token}`
+    description: type `{refresh_token}`
     in: header
     name: X-Refresh-Token
     type: apiKey

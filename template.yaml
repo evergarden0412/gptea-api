@@ -39,7 +39,7 @@ Globals:
     Environment:
       Variables:
         ENV: !Ref Env
-        ACCESS_TOKEN_TTL: 168h
+        ACCESS_TOKEN_TTL: 2h
         REFRESH_TOKEN_TTL: 168h
         REGION: !Ref "AWS::Region"
 Resources:
@@ -48,10 +48,10 @@ Resources:
     Properties:
       StageName: !Ref Env
       Domain:
-        CertificateArn: !FindInMap [FunctionMap, Cert, !Ref Env] 
+        CertificateArn: !FindInMap [FunctionMap, Cert, !Ref Env]
         DomainName: !FindInMap [FunctionMap, Domain, !Ref Env]
         Route53:
-          HostedZoneName: !FindInMap [FunctionMap, HostedZone, !Ref Env] 
+          HostedZoneName: !FindInMap [FunctionMap, HostedZone, !Ref Env]
   GPTeaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -61,7 +61,7 @@ Resources:
         ProxyAPIEvent:
           Type: Api
           Properties:
-            RestApiId: !Ref GPTeaAPI 
+            RestApiId: !Ref GPTeaAPI
             Path: /{proxy+}
             Method: any
       Runtime: provided.al2
