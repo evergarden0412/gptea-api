@@ -98,7 +98,7 @@ const docTemplate = `{
                 "tags": [
                     "token"
                 ],
-                "summary": "Refresh a tokenq",
+                "summary": "Refresh a token",
                 "responses": {
                     "200": {
                         "description": "OK",

@@ -181,7 +181,7 @@ paths:
       security:
       - AccessTokenAuth: []
       - RefreshTokenAuth: []
-      summary: Refresh a tokenq
+      summary: Refresh a token
       tags:
       - token
   /auth/token/verify:

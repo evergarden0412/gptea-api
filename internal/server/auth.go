@@ -176,7 +176,7 @@ func (s *Server) handleVerifyToken(ctx *gin.Context) {
 }
 
 // handleRefreshToken godoc
-// @Summary Refresh a tokenq
+// @Summary Refresh a token
 // @Description Refresh a token
 // @Security AccessTokenAuth
 // @Security RefreshTokenAuth
