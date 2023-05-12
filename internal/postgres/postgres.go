@@ -59,6 +59,10 @@ func (db *DB) Resign(ctx context.Context, userID string) error {
 	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
 		return err
 	}
+	query = `DELETE FROM refresh_tokens WHERE user_id = $1`
+	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
+		return err
+	}
 	query = `DELETE FROM user_credentials WHERE user_id = $1`
 	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
 		return err
@@ -68,6 +72,22 @@ func (db *DB) Resign(ctx context.Context, userID string) error {
 		return err
 	}
 	return tx.Commit()
+}
+
+func (db *DB) IsRefreshTokenExists(ctx context.Context, userID, tokenID string) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM refresh_tokens WHERE user_id = $1 AND token_id = $2)`
+	var exists bool
+	if err := db.db.QueryRowContext(ctx, query, userID, tokenID).Scan(&exists); err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (db *DB) UpsertRefreshToken(ctx context.Context, userID, tokenID string) error {
+	query := `INSERT INTO refresh_tokens (user_id, token_id) VALUES ($1, $2)
+			ON CONFLICT (user_id) DO UPDATE SET token_id = $2`
+	_, err := db.db.ExecContext(ctx, query, userID, tokenID)
+	return err
 }
 
 func (db *DB) SelectChats(ctx context.Context, userID string) ([]internal.Chat, error) {

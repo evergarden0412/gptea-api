@@ -1,5 +1,5 @@
 create table if not exists users(
-    id text primary key not null,
+    id text primary key,
     created_at timestamptz default now()
 );
 
@@ -11,17 +11,24 @@ create table if not exists user_credentials(
     primary key (credential_type, credential_id)
 );
 
+create table if not exists refresh_tokens(
+    user_id text references users(id) not null,
+    token text not null,
+    created_at timestamptz default now(),
+    primary key (user_id, token)
+);
+
 create table if not exists chats(
     id text primary key,
-    user_id text references users(id),
+    user_id text references users(id) not null,
     name text,
     created_at timestamptz default now()
 );
 
 create table if not exists messages(
     id text primary key,
-    chat_id text references chats(id),
-    seq integer,
+    chat_id text references chats(id) not null,
+    seq integer not null,
     content text,
     role text,
     created_at timestamptz default now(),
@@ -30,12 +37,12 @@ create table if not exists messages(
 
 create table if not exists scrapbooks(
     id text primary key,
-    user_id text references users(id),
+    user_id text references users(id) not null,
     name text,
     created_at timestamptz default now()
 );
 
-create table if not exists scrap(
+create table if not exists scraps(
     scrapbook_id text references scrapbooks(id),
     message_id text references messages(id),
     created_at timestamptz default now(),

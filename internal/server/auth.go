@@ -216,10 +216,25 @@ func (s *Server) handleRefreshToken(ctx *gin.Context) {
 		golog.Error("handleRefreshToken: verify refresh token: ", err)
 		return
 	}
+	if exists, err := s.db.IsRefreshTokenExists(ctx, at.Subject, rt.ID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		golog.Error("handleRefreshToken: exists refresh token: ", err)
+		return
+	} else if !exists {
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: "refresh token not in db"})
+		golog.Error("handleRefreshToken: refresh token not in db")
+		return
+	}
+
 	newAT, newRT, err := s.a.RefreshAccessToken(at, rt)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		golog.Error("handleRefreshToken: refresh: ", err)
+		return
+	}
+	if err := s.db.UpsertRefreshToken(ctx, newAT.Subject, newRT.ID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		golog.Error("handleRefreshToken: upsert refresh token: ", err)
 		return
 	}
 
