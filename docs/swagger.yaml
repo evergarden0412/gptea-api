@@ -205,6 +205,21 @@ paths:
       summary: Verify a token
       tags:
       - token
+  /me:
+    delete:
+      description: Delete my account
+      responses:
+        "204":
+          description: ""
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Delete my account
+      tags:
+      - users
   /me/chats:
     get:
       description: Get my chats in descending order of created_at

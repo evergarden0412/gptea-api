@@ -49,6 +49,27 @@ func (db *DB) SignIn(ctx context.Context, credentialType, credentialID string) (
 	return userID, nil
 }
 
+func (db *DB) Resign(ctx context.Context, userID string) error {
+	tx, err := db.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	query := `DELETE FROM chats WHERE user_id = $1`
+	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
+		return err
+	}
+	query = `DELETE FROM user_credentials WHERE user_id = $1`
+	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
+		return err
+	}
+	query = `DELETE FROM users WHERE id = $1`
+	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 func (db *DB) SelectChats(ctx context.Context, userID string) ([]internal.Chat, error) {
 	query := `SELECT id, name, created_at FROM chats WHERE user_id = $1 ORDER BY created_at DESC`
 	rows, err := db.db.QueryContext(ctx, query, userID)

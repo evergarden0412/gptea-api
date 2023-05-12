@@ -147,6 +147,31 @@
                 }
             }
         },
+        "/me": {
+            "delete": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Delete my account",
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete my account",
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/me/chats": {
             "get": {
                 "security": [
