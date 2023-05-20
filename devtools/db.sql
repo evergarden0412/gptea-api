@@ -12,10 +12,9 @@ create table if not exists user_credentials(
 );
 
 create table if not exists refresh_tokens(
-    user_id text references users(id) not null,
+    user_id text references users(id) primary key, 
     token_id text not null,
-    created_at timestamptz default now(),
-    primary key (user_id, token_id)
+    created_at timestamptz default now()
 );
 
 create table if not exists chats(
