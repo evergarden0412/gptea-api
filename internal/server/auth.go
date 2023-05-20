@@ -124,6 +124,11 @@ func (s *Server) handleSignIn(ctx *gin.Context) {
 		golog.Error("handleSignIn: issue refresh token: ", err)
 		return
 	}
+	if err := s.db.UpsertRefreshToken(ctx, at.Subject, rt.ID); err != nil {
+		golog.Error("handleSignIn: upsert refresh token: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
 	ctx.JSON(http.StatusOK, signInHandlerOutput{
 		AccessToken:  at.Signed(),
 		RefreshToken: rt.Signed(),
