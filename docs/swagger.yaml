@@ -291,6 +291,69 @@ paths:
       summary: Get my messages
       tags:
       - messages
+  /me/chats/{chatID}:
+    delete:
+      description: Delete my chat
+      parameters:
+      - description: chatID
+        in: path
+        name: chatID
+        required: true
+        type: string
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Delete my chat
+      tags:
+      - chats
+    patch:
+      description: Patch my chat name
+      parameters:
+      - description: chatID
+        in: path
+        name: chatID
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/server.chatBody'
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Patch my chat
+      tags:
+      - chats
   /me/scrapbooks:
     get:
       description: Get my scrapbooks

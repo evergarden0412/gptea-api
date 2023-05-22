@@ -56,8 +56,11 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("GET", "/auth/token/verify", s.handleVerifyToken)
 	handle("POST", "/auth/token/refresh", s.handleRefreshToken)
 	handle("DELETE", "/me", s.ensureUser, s.handleDeleteMe)
-	handle("GET", "/me/chats", s.ensureUser, s.handleGetMyChats)
+	// chat
 	handle("POST", "/me/chats", s.ensureUser, s.handlePostMyChat)
+	handle("GET", "/me/chats", s.ensureUser, s.handleGetMyChats)
+	handle("PATCH", "/me/chats/:chatID", s.ensureUser, s.handlePatchMyChat)
+	handle("DELETE", "/me/chats/:chatID", s.ensureUser, s.handleDeleteMyChat)
 	handle("GET", "/me/chats/:chatID/messages", s.ensureUser, s.handleGetMyMessages)
 	handle("GET", "/me/scrapbooks", s.ensureUser, s.handleGetMyScrapbooks)
 	handle("GET", "/me/scrapbooks/:scrapbookID/scraps", s.ensureUser, s.handleGetMyScraps)
@@ -93,69 +96,6 @@ func (s *Server) handleDeleteMe(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusNoContent)
-}
-
-// handleGetMyChats godoc
-// @Summary Get my chats
-// @Description Get my chats in descending order of created_at
-// @Security AccessTokenAuth
-// @Success 200 {object} chatsResponse
-// @Failure 500 {object} errorResponse
-// @Router /me/chats [get]
-// @tags chats
-func (s *Server) handleGetMyChats(ctx *gin.Context) {
-	userID := ctx.GetString("userID")
-
-	chats, err := s.db.SelectChats(ctx, userID)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
-		golog.Error("handleGetMyChats: select chats: ", err)
-		return
-	}
-	chatsForResp := make([]internal.Chat, len(chats))
-	copy(chatsForResp, chats)
-
-	ctx.JSON(http.StatusOK, chatsResponse{Chats: chatsForResp})
-}
-
-type chatBody struct {
-	Name string `json:"name"`
-}
-
-// handlePostMyChat godoc
-// @Summary Post my chat
-// @Description Post my chat
-// @Param body body chatBody true "body"
-// @Security AccessTokenAuth
-// @Success 201 {object} messageResponse
-// @Failure 400 {object} errorResponse
-// @Failure 500 {object} errorResponse
-// @Router /me/chats [post]
-// @tags chats
-func (s *Server) handlePostMyChat(ctx *gin.Context) {
-	userID := ctx.GetString("userID")
-	var body chatBody
-	if err := ctx.ShouldBindJSON(&body); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
-		golog.Error("handlePostMyChat: bind json: ", err)
-		return
-	}
-
-	chat, err := internal.NewChat()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
-		golog.Error("handlePostMyChat: new chat: ", err)
-		return
-	}
-	chat.Name = body.Name
-
-	if err := s.db.InsertChat(ctx, userID, *chat); err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
-		golog.Error("handlePostMyChat: insert chat: ", err)
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, messageResponse{Message: "ok"})
 }
 
 type messagesResponse struct {

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/evergarden0412/gptea-api/internal"
@@ -15,6 +16,10 @@ type DB struct {
 func New(db *sql.DB) *DB {
 	return &DB{db: db}
 }
+
+var (
+	ErrUnauthorized = fmt.Errorf("unauthorized")
+)
 
 type RegisterInput struct {
 	UserID         string
@@ -90,7 +95,7 @@ func (db *DB) UpsertRefreshToken(ctx context.Context, userID, tokenID string) er
 	return err
 }
 
-func (db *DB) SelectChats(ctx context.Context, userID string) ([]internal.Chat, error) {
+func (db *DB) SelectMyChats(ctx context.Context, userID string) ([]internal.Chat, error) {
 	query := `SELECT id, name, created_at FROM chats WHERE user_id = $1 ORDER BY created_at DESC`
 	rows, err := db.db.QueryContext(ctx, query, userID)
 	if err != nil {
@@ -108,9 +113,45 @@ func (db *DB) SelectChats(ctx context.Context, userID string) ([]internal.Chat, 
 	return chats, nil
 }
 
+func (db *DB) SelectMyChat(ctx context.Context, userID, chatID string) (internal.Chat, error) {
+	query := `SELECT id, user_id, name, created_at FROM chats WHERE id = $1`
+	var chat internal.Chat
+	var chatUserID string
+	if err := db.db.QueryRowContext(ctx, query, chatID).Scan(&chat.ID, &chatUserID, &chat.Name, &chat.CreatedAt); err != nil {
+		return internal.Chat{}, err
+	}
+	if chatUserID != userID {
+		return internal.Chat{}, ErrUnauthorized
+	}
+	return chat, nil
+}
+
 func (db *DB) InsertChat(ctx context.Context, userID string, inp internal.Chat) error {
 	query := `INSERT INTO chats (id, user_id, name, created_at) VALUES ($1, $2, $3, $4)`
 	if _, err := db.db.ExecContext(ctx, query, inp.ID, userID, inp.Name, inp.CreatedAt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DB) PatchChat(ctx context.Context, userID string, inp internal.Chat) error {
+	chat, err := db.SelectMyChat(ctx, userID, inp.ID)
+	if err != nil {
+		return err
+	}
+	if inp.Name != "" {
+		chat.Name = inp.Name
+	}
+	query := `UPDATE chats SET name = $1 WHERE id = $2`
+	if _, err := db.db.ExecContext(ctx, query, chat.Name, chat.ID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DB) DeleteChat(ctx context.Context, userID, chatID string) error {
+	query := `DELETE FROM chats WHERE id = $1 AND user_id = $2`
+	if _, err := db.db.ExecContext(ctx, query, chatID, userID); err != nil {
 		return err
 	}
 	return nil
