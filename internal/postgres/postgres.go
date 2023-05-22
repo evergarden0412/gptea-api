@@ -55,28 +55,11 @@ func (db *DB) SignIn(ctx context.Context, credentialType, credentialID string) (
 }
 
 func (db *DB) Resign(ctx context.Context, userID string) error {
-	tx, err := db.db.BeginTx(ctx, nil)
-	if err != nil {
+	query := `DELETE FROM users WHERE id = $1`
+	if _, err := db.db.ExecContext(ctx, query, userID); err != nil {
 		return err
 	}
-	defer tx.Rollback()
-	query := `DELETE FROM chats WHERE user_id = $1`
-	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
-		return err
-	}
-	query = `DELETE FROM refresh_tokens WHERE user_id = $1`
-	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
-		return err
-	}
-	query = `DELETE FROM user_credentials WHERE user_id = $1`
-	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
-		return err
-	}
-	query = `DELETE FROM users WHERE id = $1`
-	if _, err := tx.ExecContext(ctx, query, userID); err != nil {
-		return err
-	}
-	return tx.Commit()
+	return nil
 }
 
 func (db *DB) IsRefreshTokenExists(ctx context.Context, userID, tokenID string) (bool, error) {
