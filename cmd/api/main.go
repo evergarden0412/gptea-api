@@ -50,6 +50,7 @@ func main() {
 	r := gin.Default()
 	corsCfg := cors.DefaultConfig()
 	corsCfg.AllowOrigins = []string{"https://gptea.keenranger.dev", "https://gptea-test.keenranger.dev"}
+	corsCfg.AllowHeaders = []string{"origin", "content-length", "content-type", "authorization", "x-refresh-token"}
 	r.Use(cors.New(corsCfg))
 	s.Install(r.Handle)
 	if os.Getenv("LOCAL") == "true" {
