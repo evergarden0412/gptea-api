@@ -21,7 +21,7 @@ func New(client *openai.Client) *Chatbot {
 func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*internal.Message, newmsg string) (in, out *internal.Message, err error) {
 	lastSeq := 0
 	if len(history) != 0 {
-		lastSeq = history[len(history)-1].Seq
+		lastSeq = history[0].Seq
 	}
 	now := time.Now().UTC()
 	nowPtr := &now
@@ -33,20 +33,20 @@ func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*intern
 		Role:      openai.ChatMessageRoleUser,
 	}
 
-	messages := buildMessages(history, in)
-	req := openai.ChatCompletionRequest{
-		Model:     openai.GPT3Dot5Turbo,
-		MaxTokens: 20,
-		Messages:  messages,
-	}
-	resp, err := c.client.CreateChatCompletion(ctx, req)
-	if err != nil {
-		return nil, nil, err
-	}
+	// messages := buildMessages(history, in)
+	// req := openai.ChatCompletionRequest{
+	// Model:     openai.GPT3Dot5Turbo,
+	// MaxTokens: 20,
+	// Messages:  messages,
+	// }
+	// resp, err := c.client.CreateChatCompletion(ctx, req)
+	// if err != nil {
+	// return nil, nil, err
+	// }
 	out = &internal.Message{
 		ChatID:    chatID,
 		Seq:       lastSeq + 2,
-		Content:   resp.Choices[0].Message.Content,
+		Content:   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
 		CreatedAt: nowPtr,
 		Role:      openai.ChatMessageRoleAssistant,
 	}

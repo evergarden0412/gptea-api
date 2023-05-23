@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/evergarden0412/gptea-api/internal/auth"
+	"github.com/evergarden0412/gptea-api/internal/chatbot"
 	"github.com/evergarden0412/gptea-api/internal/config"
 	"github.com/evergarden0412/gptea-api/internal/postgres"
 	"github.com/evergarden0412/gptea-api/internal/server"
@@ -46,7 +47,8 @@ func main() {
 	}
 	defer db.Close()
 	postgresDB := postgres.New(db)
-	s := server.New(a, postgresDB)
+	chatbot := chatbot.New(nil)
+	s := server.New(a, chatbot, postgresDB)
 	r := gin.Default()
 	corsCfg := cors.DefaultConfig()
 	corsCfg.AllowOrigins = []string{"https://gptea.keenranger.dev", "https://gptea-test.keenranger.dev"}

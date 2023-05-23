@@ -9,6 +9,7 @@ import (
 	_ "github.com/evergarden0412/gptea-api/docs"
 	"github.com/evergarden0412/gptea-api/internal"
 	"github.com/evergarden0412/gptea-api/internal/auth"
+	"github.com/evergarden0412/gptea-api/internal/chatbot"
 	"github.com/evergarden0412/gptea-api/internal/postgres"
 	"github.com/gin-gonic/gin"
 	"github.com/kataras/golog"
@@ -17,13 +18,15 @@ import (
 )
 
 type Server struct {
+	c  *chatbot.Chatbot
 	a  *auth.Authenticator
 	db *postgres.DB
 }
 
-func New(a *auth.Authenticator, db *postgres.DB) *Server {
+func New(a *auth.Authenticator, chatbot *chatbot.Chatbot, db *postgres.DB) *Server {
 	return &Server{
 		a:  a,
+		c:  chatbot,
 		db: db,
 	}
 }
@@ -57,11 +60,13 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("POST", "/auth/token/refresh", s.handleRefreshToken)
 	handle("DELETE", "/me", s.ensureUser, s.handleDeleteMe)
 	// chat
-	handle("POST", "/me/chats", s.ensureUser, s.handlePostMyChat)
 	handle("GET", "/me/chats", s.ensureUser, s.handleGetMyChats)
+	handle("POST", "/me/chats", s.ensureUser, s.handlePostMyChat)
 	handle("PATCH", "/me/chats/:chatID", s.ensureUser, s.handlePatchMyChat)
 	handle("DELETE", "/me/chats/:chatID", s.ensureUser, s.handleDeleteMyChat)
+	// message
 	handle("GET", "/me/chats/:chatID/messages", s.ensureUser, s.handleGetMyMessages)
+	handle("POST", "/me/chats/:chatID/messages", s.ensureUser, s.handlePostMyMessage)
 	handle("GET", "/me/scrapbooks", s.ensureUser, s.handleGetMyScrapbooks)
 	handle("GET", "/me/scrapbooks/:scrapbookID/scraps", s.ensureUser, s.handleGetMyScraps)
 	handle("DELETE", "/me/scrapbooks/", s.ensureUser)
@@ -103,43 +108,83 @@ type messagesResponse struct {
 }
 
 // handleGetMyMessages godoc
-// @Summary Get my messages
-// @Description Get my messages in descending order of created_at
-// @Param chatID path string true "chatID"
-// @Security AccessTokenAuth
-// @Success 200 {object} messagesResponse
-// @Failure 400 {object} errorResponse
-// @Failure 500 {object} errorResponse
-// @Router /me/chats/:chatID/messages [get]
+// @summary Get my messages
+// @description Get my messages in descending order of created_at
 // @tags messages
-func (s *Server) handleGetMyMessages(c *gin.Context) {
-	sampleTime0 := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
-	sampleTime1 := time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC)
-	sampleTime2 := time.Date(2021, 1, 3, 0, 0, 0, 0, time.UTC)
-	someSampleMessages := []internal.Message{
-		{
-			ChatID:    "1",
-			Seq:       1,
-			Content:   "message1",
-			CreatedAt: &sampleTime0,
-		},
-		{
-			ChatID:    "1",
-			Seq:       2,
-			Content:   "message2",
-			CreatedAt: &sampleTime1,
-		},
-		{
-			ChatID:    "1",
-			Seq:       3,
-			Content:   "message3",
-			CreatedAt: &sampleTime2,
-		},
+// @security AccessTokenAuth
+// @param chatID path string true "chatID"
+// @success 200 {object} messagesResponse
+// @failure 400 {object} errorResponse
+// @failure 500 {object} errorResponse
+// @router /me/chats/{chatID}/messages [get]
+func (s *Server) handleGetMyMessages(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+	chatID := ctx.Param("chatID")
+
+	messages, err := s.db.GetMyMessages(ctx, userID, chatID)
+	if err != nil {
+		golog.Error("handleGetMyMessages: get messages: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
 	}
-	sort.Slice(someSampleMessages, func(i, j int) bool {
-		return someSampleMessages[i].Seq > someSampleMessages[j].Seq
-	})
-	c.JSON(http.StatusOK, messagesResponse{Messages: someSampleMessages})
+
+	messagesResp := make([]internal.Message, len(messages))
+	for i, message := range messages {
+		messagesResp[i] = *message
+	}
+
+	ctx.JSON(http.StatusOK, messagesResponse{Messages: messagesResp})
+}
+
+type messageBody struct {
+	Content string `json:"content"`
+}
+
+// handlePostMyMessage godoc
+// @summary Post my message
+// @description Post my message and get response when chatbot finishes processing
+// @tags messages
+// @security AccessTokenAuth
+// @param chatID path string true "chatID"
+// @param body body messageBody true "body"
+// @success 201 {object} messageResponse
+// @failure 400 {object} errorResponse
+// @failure 500 {object} errorResponse
+// @router /me/chats/{chatID}/messages [post]
+func (s *Server) handlePostMyMessage(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+	chatID := ctx.Param("chatID")
+	var body messageBody
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
+		golog.Error("handlePostMyMessage: bind json: ", err)
+		return
+	}
+
+	history, err := s.db.GetMyMessages(ctx, userID, chatID)
+	if err != nil {
+		golog.Error("handlePostMyMessage: get history: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+	inMsg, outMsg, err := s.c.SendChat(ctx, chatID, history, body.Content)
+	if err != nil {
+		golog.Error("handlePostMyMessage: send chat: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+	if err := s.db.InsertMessage(ctx, userID, *inMsg); err != nil {
+		golog.Error("handlePostMyMessage: insert message: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+	if err := s.db.InsertMessage(ctx, userID, *outMsg); err != nil {
+		golog.Error("handlePostMyMessage: insert message: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, messageResponse{Message: outMsg.Content})
 }
 
 type scrapbooksResponse struct {

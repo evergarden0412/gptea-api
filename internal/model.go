@@ -30,7 +30,7 @@ type Message struct {
 	ChatID    string     `json:"chatID" example:"Hjejwerhj"`
 	Seq       int        `json:"seq" example:"1"` // seq starts from 1
 	Content   string     `json:"content"`
-	Role      string     `json:"-"`
+	Role      string     `json:"role"`
 	CreatedAt *time.Time `json:"createdAt"`
 }
 

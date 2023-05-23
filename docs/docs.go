@@ -251,49 +251,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/me/chats/:chatID/messages": {
-            "get": {
-                "security": [
-                    {
-                        "AccessTokenAuth": []
-                    }
-                ],
-                "description": "Get my messages in descending order of created_at",
-                "tags": [
-                    "messages"
-                ],
-                "summary": "Get my messages",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "chatID",
-                        "name": "chatID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/server.messagesResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/server.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/me/chats/{chatID}": {
             "delete": {
                 "security": [
@@ -380,6 +337,99 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/chats/{chatID}/messages": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Get my messages in descending order of created_at",
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Get my messages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "chatID",
+                        "name": "chatID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.messagesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Post my message and get response when chatbot finishes processing",
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Post my message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "chatID",
+                        "name": "chatID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.messageBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/server.messageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/server.errorResponse"
                         }
@@ -567,6 +617,14 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "error message"
+                }
+            }
+        },
+        "server.messageBody": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
                 }
             }
         },

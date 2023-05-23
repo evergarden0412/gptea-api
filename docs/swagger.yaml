@@ -66,6 +66,11 @@ definitions:
         example: error message
         type: string
     type: object
+  server.messageBody:
+    properties:
+      content:
+        type: string
+    type: object
   server.messageResponse:
     properties:
       message:
@@ -264,33 +269,6 @@ paths:
       summary: Post my chat
       tags:
       - chats
-  /me/chats/:chatID/messages:
-    get:
-      description: Get my messages in descending order of created_at
-      parameters:
-      - description: chatID
-        in: path
-        name: chatID
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/server.messagesResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/server.errorResponse'
-      security:
-      - AccessTokenAuth: []
-      summary: Get my messages
-      tags:
-      - messages
   /me/chats/{chatID}:
     delete:
       description: Delete my chat
@@ -354,6 +332,65 @@ paths:
       summary: Patch my chat
       tags:
       - chats
+  /me/chats/{chatID}/messages:
+    get:
+      description: Get my messages in descending order of created_at
+      parameters:
+      - description: chatID
+        in: path
+        name: chatID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.messagesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Get my messages
+      tags:
+      - messages
+    post:
+      description: Post my message and get response when chatbot finishes processing
+      parameters:
+      - description: chatID
+        in: path
+        name: chatID
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/server.messageBody'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/server.messageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Post my message
+      tags:
+      - messages
   /me/scrapbooks:
     get:
       description: Get my scrapbooks

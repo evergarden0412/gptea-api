@@ -139,3 +139,38 @@ func (db *DB) DeleteChat(ctx context.Context, userID, chatID string) error {
 	}
 	return nil
 }
+
+func (db *DB) GetMyMessages(ctx context.Context, userID, chatID string) ([]*internal.Message, error) {
+	_, err := db.SelectMyChat(ctx, userID, chatID)
+	if err != nil {
+		return nil, err
+	}
+	query := `SELECT chat_id, seq, content, role, created_at FROM messages WHERE chat_id = $1 ORDER BY seq DESC`
+	rows, err := db.db.QueryContext(ctx, query, chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var messages []*internal.Message
+	for rows.Next() {
+		var msg internal.Message
+		if err := rows.Scan(&msg.ChatID, &msg.Seq, &msg.Content, &msg.Role, &msg.CreatedAt); err != nil {
+			return nil, err
+		}
+		messages = append(messages, &msg)
+	}
+	return messages, nil
+}
+
+func (db *DB) InsertMessage(ctx context.Context, userID string, inp internal.Message) error {
+	_, err := db.SelectMyChat(ctx, userID, inp.ChatID)
+	if err != nil {
+		return err
+	}
+	query := `INSERT INTO messages (chat_id, seq, content, role, created_at) VALUES ($1, $2, $3, $4, $5)`
+	if _, err := db.db.ExecContext(ctx, query, inp.ChatID, inp.Seq, inp.Content, inp.Role, inp.CreatedAt); err != nil {
+		return err
+	}
+	return nil
+}

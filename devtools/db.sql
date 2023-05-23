@@ -25,7 +25,6 @@ create table if not exists chats(
 );
 
 create table if not exists messages(
-    id text primary key,
     chat_id text references chats(id) on delete cascade not null,
     seq integer not null,
     content text not null,
@@ -42,8 +41,11 @@ create table if not exists scrapbooks(
 );
 
 create table if not exists scraps(
+    id text primary key,
     scrapbook_id text references scrapbooks(id) on delete cascade not null,
-    message_id text references messages(id) on delete cascade not null,
+    message_chat_id text not null,
+    message_seq integer not null,
+    foreign key (message_chat_id, message_seq) references messages(chat_id, seq) on delete cascade,
     created_at timestamptz default now() not null,
-    primary key (scrapbook_id, message_id)
+    unique(scrapbook_id, message_chat_id, message_seq)
 );
