@@ -103,7 +103,6 @@ func (s *Server) handleSignIn(ctx *gin.Context) {
 	userID, err := s.db.SignIn(ctx, verifyResult.CredentialProvider, verifyResult.CredentialID)
 	if errors.Is(err, sql.ErrNoRows) {
 		ctx.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
-		golog.Error("handleSignIn: sign in: ", err)
 		return
 	}
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
