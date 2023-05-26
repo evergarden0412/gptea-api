@@ -247,3 +247,44 @@ func (s *Server) handleRefreshToken(ctx *gin.Context) {
 		RefreshToken: newRT.Signed(),
 	})
 }
+
+// handleLogout godoc
+// @summary Logout
+// @description delete refresh token
+// @tags token
+// @Security AccessTokenAuth
+// @success 204
+// @failure 400 {object} errorResponse
+// @failure 500 {object} errorResponse
+// @router /auth/cred/logout [delete]
+func (s *Server) handleLogout(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+
+	if err := s.db.Logout(ctx, userID); err != nil {
+		golog.Error("handleLogout: delete refresh token: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
+}
+
+// handleDeleteMe godoc
+// @Summary Delete my account
+// @Description Delete my account
+// @tags users
+// @Security AccessTokenAuth
+// @Success 204
+// @Failure 500 {object} errorResponse
+// @Router /me [delete]
+func (s *Server) handleDeleteMe(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+
+	if err := s.db.Resign(ctx, userID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		golog.Error("handleDeleteMe: delete user: ", err)
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
+}

@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/evergarden0412/gptea-api/internal"
@@ -18,7 +18,8 @@ func New(db *sql.DB) *DB {
 }
 
 var (
-	ErrUnauthorized = fmt.Errorf("unauthorized")
+	ErrUnauthorized   = errors.New("unauthorized")
+	ErrChatNotPatched = errors.New("chat not patched")
 )
 
 type RegisterInput struct {
@@ -54,10 +55,30 @@ func (db *DB) SignIn(ctx context.Context, credentialType, credentialID string) (
 	return userID, nil
 }
 
+func (db *DB) Logout(ctx context.Context, userID string) error {
+	query := `DELETE FROM refresh_tokens WHERE user_id = $1`
+	res, err := db.db.ExecContext(ctx, query, userID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
+	}
+	return nil
+}
+
 func (db *DB) Resign(ctx context.Context, userID string) error {
 	query := `DELETE FROM users WHERE id = $1`
-	if _, err := db.db.ExecContext(ctx, query, userID); err != nil {
+	res, err := db.db.ExecContext(ctx, query, userID)
+	if err != nil {
 		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
 	}
 	return nil
 }
@@ -126,16 +147,28 @@ func (db *DB) PatchChat(ctx context.Context, userID string, inp internal.Chat) e
 		chat.Name = inp.Name
 	}
 	query := `UPDATE chats SET name = $1 WHERE id = $2`
-	if _, err := db.db.ExecContext(ctx, query, chat.Name, chat.ID); err != nil {
+	res, err := db.db.ExecContext(ctx, query, chat.Name, chat.ID)
+	if err != nil {
 		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrChatNotPatched
 	}
 	return nil
 }
 
 func (db *DB) DeleteChat(ctx context.Context, userID, chatID string) error {
 	query := `DELETE FROM chats WHERE id = $1 AND user_id = $2`
-	if _, err := db.db.ExecContext(ctx, query, chatID, userID); err != nil {
+	res, err := db.db.ExecContext(ctx, query, chatID, userID)
+	if err != nil {
 		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
 	}
 	return nil
 }

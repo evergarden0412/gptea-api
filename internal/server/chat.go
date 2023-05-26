@@ -49,6 +49,10 @@ func (s *Server) handlePostMyChat(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, messageResponse{Message: "ok"})
 }
 
+type chatsResponse struct {
+	Chats []internal.Chat `json:"chats"`
+}
+
 // handleGetMyChats godoc
 // @Summary Get my chats
 // @Description Get my chats in descending order of created_at

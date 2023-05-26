@@ -56,6 +56,7 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("POST", "/auth/cred/oauth/token")
 	handle("POST", "/auth/cred/register", s.handleRegister)
 	handle("POST", "/auth/cred/sign-in", s.handleSignIn)
+	handle("POST", "/auth/cred/logout", s.ensureUser, s.handleLogout)
 	handle("GET", "/auth/token/verify", s.handleVerifyToken)
 	handle("POST", "/auth/token/refresh", s.handleRefreshToken)
 	handle("DELETE", "/me", s.ensureUser, s.handleDeleteMe)
@@ -68,8 +69,12 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("GET", "/me/chats/:chatID/messages", s.ensureUser, s.handleGetMyMessages)
 	handle("POST", "/me/chats/:chatID/messages", s.ensureUser, s.handlePostMyMessage)
 	handle("GET", "/me/scrapbooks", s.ensureUser, s.handleGetMyScrapbooks)
+	handle("POST", "/me/scrapbooks", s.ensureUser)
+	handle("DELETE", "/me/scrapbooks/:scrapbookID", s.ensureUser)
+	handle("PATCH", "/me/scrapbooks/:scrapbookID", s.ensureUser)
 	handle("GET", "/me/scrapbooks/:scrapbookID/scraps", s.ensureUser, s.handleGetMyScraps)
-	handle("DELETE", "/me/scrapbooks/", s.ensureUser)
+	// scrap
+	handle("GET", "/me/scraps", s.ensureUser)
 	if os.Getenv("ENV") != "prod" {
 		handle("GET", "/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
@@ -77,30 +82,6 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 
 func (s *Server) handlePing(c *gin.Context) {
 	c.JSON(http.StatusOK, messageResponse{Message: "pong"})
-}
-
-type chatsResponse struct {
-	Chats []internal.Chat `json:"chats"`
-}
-
-// handleDeleteMe godoc
-// @Summary Delete my account
-// @Description Delete my account
-// @Security AccessTokenAuth
-// @Success 204
-// @Failure 500 {object} errorResponse
-// @Router /me [delete]
-// @tags users
-func (s *Server) handleDeleteMe(ctx *gin.Context) {
-	userID := ctx.GetString("userID")
-
-	if err := s.db.Resign(ctx, userID); err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
-		golog.Error("handleDeleteMe: delete user: ", err)
-		return
-	}
-
-	ctx.Status(http.StatusNoContent)
 }
 
 type messagesResponse struct {
