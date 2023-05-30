@@ -548,49 +548,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/me/scrapbooks/:scrapbookID/scraps": {
-            "get": {
-                "security": [
-                    {
-                        "AccessTokenAuth": []
-                    }
-                ],
-                "description": "Get my scraps in descending order of created_at",
-                "tags": [
-                    "scraps"
-                ],
-                "summary": "Get my scraps",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "scrapbookID",
-                        "name": "scrapbookID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/server.scrapsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/server.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/me/scrapbooks/{scrapbookID}": {
             "delete": {
                 "security": [
@@ -662,6 +619,49 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/scrapbooks/{scrapbookID}/scraps": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Get my scraps in descending order of created_at",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "Get my scraps",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scrapbookID",
+                        "name": "scrapbookID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.scrapsResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",

@@ -463,33 +463,6 @@ paths:
       summary: post new scrapbook
       tags:
       - scraps
-  /me/scrapbooks/:scrapbookID/scraps:
-    get:
-      description: Get my scraps in descending order of created_at
-      parameters:
-      - description: scrapbookID
-        in: path
-        name: scrapbookID
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/server.scrapsResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/server.errorResponse'
-      security:
-      - AccessTokenAuth: []
-      summary: Get my scraps
-      tags:
-      - scraps
   /me/scrapbooks/{scrapbookID}:
     delete:
       description: delete scrapbook
@@ -543,6 +516,33 @@ paths:
       security:
       - AccessTokenAuth: []
       summary: patch scrapbook
+      tags:
+      - scraps
+  /me/scrapbooks/{scrapbookID}/scraps:
+    get:
+      description: Get my scraps in descending order of created_at
+      parameters:
+      - description: scrapbookID
+        in: path
+        name: scrapbookID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.scrapsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Get my scraps
       tags:
       - scraps
 securityDefinitions:

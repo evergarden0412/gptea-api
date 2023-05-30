@@ -307,7 +307,7 @@ type scrapsResponse struct {
 // @Success 200 {object} scrapsResponse
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
-// @Router /me/scrapbooks/:scrapbookID/scraps [get]
+// @Router /me/scrapbooks/{scrapbookID}/scraps [get]
 // @tags scraps
 func (s *Server) handleGetMyScraps(c *gin.Context) {
 	sampleTime0 := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
