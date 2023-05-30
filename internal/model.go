@@ -35,9 +35,19 @@ type Message struct {
 }
 
 type Scrapbook struct {
-	ID        string     `json:"id" example:"Hjejwerhj"`
-	Name      string     `json:"name" example:"basic"`
-	CreatedAt *time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
+	ID        string    `json:"id" example:"Hjejwerhj"`
+	Name      string    `json:"name" example:"basic"`
+	CreatedAt time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
+}
+
+func (s *Scrapbook) Assign() error {
+	id, err := NewUserID()
+	if err != nil {
+		return err
+	}
+	s.ID = id
+	s.CreatedAt = time.Now().UTC()
+	return nil
 }
 
 type Scrap struct {

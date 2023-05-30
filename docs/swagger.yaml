@@ -86,6 +86,11 @@ definitions:
           $ref: '#/definitions/internal.Message'
         type: array
     type: object
+  server.scrapbookBody:
+    properties:
+      name:
+        type: string
+    type: object
   server.scrapbooksResponse:
     properties:
       scrapbooks:
@@ -433,6 +438,31 @@ paths:
       summary: Get my scrapbooks
       tags:
       - scraps
+    post:
+      description: post new scrapbook
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/server.scrapbookBody'
+      responses:
+        "201":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: post new scrapbook
+      tags:
+      - scraps
   /me/scrapbooks/:scrapbookID/scraps:
     get:
       description: Get my scraps in descending order of created_at
@@ -458,6 +488,61 @@ paths:
       security:
       - AccessTokenAuth: []
       summary: Get my scraps
+      tags:
+      - scraps
+  /me/scrapbooks/{scrapbookID}:
+    delete:
+      description: delete scrapbook
+      parameters:
+      - description: scrapbookID
+        in: path
+        name: scrapbookID
+        required: true
+        type: string
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: delete scrapbook
+      tags:
+      - scraps
+    patch:
+      description: patch scrapbook
+      parameters:
+      - description: scrapbookID
+        in: path
+        name: scrapbookID
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/server.scrapbookBody'
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: patch scrapbook
       tags:
       - scraps
 securityDefinitions:

@@ -69,9 +69,9 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("GET", "/me/chats/:chatID/messages", s.ensureUser, s.handleGetMyMessages)
 	handle("POST", "/me/chats/:chatID/messages", s.ensureUser, s.handlePostMyMessage)
 	handle("GET", "/me/scrapbooks", s.ensureUser, s.handleGetMyScrapbooks)
-	handle("POST", "/me/scrapbooks", s.ensureUser)
-	handle("DELETE", "/me/scrapbooks/:scrapbookID", s.ensureUser)
-	handle("PATCH", "/me/scrapbooks/:scrapbookID", s.ensureUser)
+	handle("POST", "/me/scrapbooks", s.ensureUser, s.handlePostMyScrapbook)
+	handle("DELETE", "/me/scrapbooks/:scrapbookID", s.ensureUser, s.handleDeleteMyScrapbook)
+	handle("PATCH", "/me/scrapbooks/:scrapbookID", s.ensureUser, s.handlePatchMyScrapbook)
 	handle("GET", "/me/scrapbooks/:scrapbookID/scraps", s.ensureUser, s.handleGetMyScraps)
 	// scrap
 	handle("GET", "/me/scraps", s.ensureUser)
@@ -173,22 +173,126 @@ type scrapbooksResponse struct {
 }
 
 // handleGetMyScrapbooks godoc
-// @Summary Get my scrapbooks
-// @Description Get my scrapbooks
-// @Security AccessTokenAuth
-// @Success 200 {object} scrapbooksResponse
-// @Failure 400 {object} errorResponse
-// @Failure 500 {object} errorResponse
-// @Router /me/scrapbooks [get]
-// @tags scraps
+//
+//	@summary Get my scrapbooks
+//	@description Get my scrapbooks
+//	@tags scraps
+//	@security AccessTokenAuth
+//	@success 200 {object} scrapbooksResponse
+//	@failure 400 {object} errorResponse
+//	@failure 500 {object} errorResponse
+//	@router /me/scrapbooks [get]
 func (s *Server) handleGetMyScrapbooks(ctx *gin.Context) {
-	sampleTime0 := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
-	basicScrapbook := internal.Scrapbook{
-		ID:        "1",
-		Name:      "basic",
-		CreatedAt: &sampleTime0,
+	userID := ctx.GetString("userID")
+
+	scrapbooks, err := s.db.SelectMyScrapbooks(ctx, userID)
+	if err != nil {
+		golog.Error("handleGetMyScrapbooks: select my scrapbooks: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
 	}
-	ctx.JSON(http.StatusOK, scrapbooksResponse{Scrapbooks: []internal.Scrapbook{basicScrapbook}})
+
+	scrapbooksResp := make([]internal.Scrapbook, len(scrapbooks))
+	for i, scrapbook := range scrapbooks {
+		scrapbooksResp[i] = scrapbook
+	}
+	ctx.JSON(http.StatusOK, scrapbooksResponse{Scrapbooks: scrapbooksResp})
+}
+
+type scrapbookBody struct {
+	Name string `json:"name"`
+}
+
+// handlePostMyScrapbook godoc
+//
+//	@summary post new scrapbook
+//	@description post new scrapbook
+//	@tags scraps
+//	@security AccessTokenAuth
+//	@param body body scrapbookBody true "body"
+//	@success 201
+//	@failure 400 {object} errorResponse
+//	@failure 500 {object} errorResponse
+//	@router /me/scrapbooks [post]
+func (s *Server) handlePostMyScrapbook(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+	var body scrapbookBody
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		golog.Error("handlePostMyScrapbook: bind json: ", err)
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
+		return
+	}
+	scrapbook := internal.Scrapbook{
+		Name: body.Name,
+	}
+	if err := scrapbook.Assign(); err != nil {
+		golog.Error("handlePostMyScrapbook: assign: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+
+	if err := s.db.InsertScrapbook(ctx, userID, scrapbook); err != nil {
+		golog.Error("handlePostMyScrapbook: insert scrapbook: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}
+
+// handleDeleteMyScrapbook godoc
+//
+//	@summary delete scrapbook
+//	@description delete scrapbook
+//	@tags scraps
+//	@security AccessTokenAuth
+//	@param scrapbookID path string true "scrapbookID"
+//	@success 204
+//	@failure 400 {object} errorResponse
+//	@failure 500 {object} errorResponse
+//	@router /me/scrapbooks/{scrapbookID} [delete]
+func (s *Server) handleDeleteMyScrapbook(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+	scrapbookID := ctx.Param("scrapbookID")
+
+	if err := s.db.DeleteScrapbook(ctx, userID, scrapbookID); err != nil {
+		golog.Error("handleDeleteMyScrapbook: delete scrapbook: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
+}
+
+// handlePatchMyScrapbook godoc
+//
+//	@summary patch scrapbook
+//	@description patch scrapbook
+//	@tags scraps
+//	@security AccessTokenAuth
+//	@param scrapbookID path string true "scrapbookID"
+//	@param body body scrapbookBody true "body"
+//	@success 204
+//	@failure 400 {object} errorResponse
+//	@failure 500 {object} errorResponse
+//	@router /me/scrapbooks/{scrapbookID} [patch]
+func (s *Server) handlePatchMyScrapbook(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+	scrapbookID := ctx.Param("scrapbookID")
+	var body scrapbookBody
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		golog.Error("handlePatchMyScrapbook: bind json: ", err)
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
+		return
+	}
+
+	if err := s.db.PatchScrapbook(ctx, userID, scrapbookID, body.Name); err != nil {
+		golog.Error("handlePatchMyScrapbook: patch scrapbook: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+
+	ctx.Status(http.StatusNoContent)
 }
 
 type scrapsResponse struct {

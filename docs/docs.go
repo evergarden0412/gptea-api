@@ -506,6 +506,46 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "post new scrapbook",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "post new scrapbook",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.scrapbookBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
             }
         },
         "/me/scrapbooks/:scrapbookID/scraps": {
@@ -535,6 +575,93 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/server.scrapsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/scrapbooks/{scrapbookID}": {
+            "delete": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "delete scrapbook",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "delete scrapbook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scrapbookID",
+                        "name": "scrapbookID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "patch scrapbook",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "patch scrapbook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scrapbookID",
+                        "name": "scrapbookID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.scrapbookBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -679,6 +806,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/internal.Message"
                     }
+                }
+            }
+        },
+        "server.scrapbookBody": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
                 }
             }
         },

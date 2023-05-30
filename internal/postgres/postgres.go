@@ -18,8 +18,9 @@ func New(db *sql.DB) *DB {
 }
 
 var (
-	ErrUnauthorized   = errors.New("unauthorized")
-	ErrChatNotPatched = errors.New("chat not patched")
+	ErrUnauthorized    = errors.New("unauthorized")
+	ErrChatNotPatched  = errors.New("chat not patched")
+	ErrInsertScrapbook = errors.New("insert scrapbook failed")
 )
 
 type RegisterInput struct {
@@ -204,6 +205,67 @@ func (db *DB) InsertMessage(ctx context.Context, userID string, inp internal.Mes
 	query := `INSERT INTO messages (chat_id, seq, content, role, created_at) VALUES ($1, $2, $3, $4, $5)`
 	if _, err := db.db.ExecContext(ctx, query, inp.ChatID, inp.Seq, inp.Content, inp.Role, inp.CreatedAt); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (db *DB) SelectMyScrapbooks(ctx context.Context, userID string) ([]internal.Scrapbook, error) {
+	query := `SELECT id, name, created_at FROM scrapbooks WHERE user_id = $1 ORDER BY created_at ASC`
+	rows, err := db.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var scrapbooks []internal.Scrapbook
+	for rows.Next() {
+		var scrapbook internal.Scrapbook
+		if err := rows.Scan(&scrapbook.ID, &scrapbook.Name, &scrapbook.CreatedAt); err != nil {
+			return nil, err
+		}
+		scrapbooks = append(scrapbooks, scrapbook)
+	}
+	return scrapbooks, nil
+}
+
+func (db *DB) InsertScrapbook(ctx context.Context, userID string, inp internal.Scrapbook) error {
+	query := `INSERT INTO scrapbooks (id, user_id, name, created_at) VALUES ($1, $2, $3, $4)`
+	res, err := db.db.ExecContext(ctx, query, inp.ID, userID, inp.Name, inp.CreatedAt)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrInsertScrapbook
+	}
+	return nil
+}
+
+func (db *DB) DeleteScrapbook(ctx context.Context, userID, scrapbookID string) error {
+	query := `DELETE FROM scrapbooks WHERE id = $1 AND user_id = $2`
+	res, err := db.db.ExecContext(ctx, query, scrapbookID, userID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
+	}
+	return nil
+}
+
+func (db *DB) PatchScrapbook(ctx context.Context, userID, scrapbookID, name string) error {
+	query := `UPDATE scrapbooks SET name = $1 WHERE id = $2 AND user_id = $3`
+	res, err := db.db.ExecContext(ctx, query, name, scrapbookID, userID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
 	}
 	return nil
 }
