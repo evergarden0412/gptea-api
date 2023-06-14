@@ -37,11 +37,14 @@ type Message struct {
 type Scrapbook struct {
 	ID        string    `json:"id" example:"Hjejwerhj"`
 	Name      string    `json:"name" example:"basic"`
+	IsDefault bool      `json:"isDefault" example:"true"`
 	CreatedAt time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
 }
 
+const DefaultScrapbookName = "기본 스크랩북"
+
 func (s *Scrapbook) Assign() error {
-	id, err := NewUserID()
+	id, err := NewID()
 	if err != nil {
 		return err
 	}
@@ -55,12 +58,12 @@ type Scrap struct {
 	CreatedAt *time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
 }
 
-func NewUserID() (string, error) {
+func NewID() (string, error) {
 	id := make([]byte, 15) // base32 encoding muiltiple of 5
 	_, err := rand.Read(id)
 	if err != nil {
 		return "", err
 	}
-	userID := base32.StdEncoding.EncodeToString(id)
-	return userID, nil
+	createdID := base32.StdEncoding.EncodeToString(id)
+	return createdID, nil
 }

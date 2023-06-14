@@ -46,7 +46,7 @@ func (s *Server) handleRegister(ctx *gin.Context) {
 		golog.Error("handleRegister: verify: ", err)
 		return
 	}
-	userID, err := internal.NewUserID()
+	userID, err := internal.NewID()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		golog.Error("handleRegister: new user id: ", err)

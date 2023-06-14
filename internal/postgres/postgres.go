@@ -18,9 +18,10 @@ func New(db *sql.DB) *DB {
 }
 
 var (
-	ErrUnauthorized    = errors.New("unauthorized")
-	ErrChatNotPatched  = errors.New("chat not patched")
-	ErrInsertScrapbook = errors.New("insert scrapbook failed")
+	ErrUnauthorized     = errors.New("unauthorized")
+	ErrChatNotPatched   = errors.New("chat not patched")
+	ErrInsertScrapbook  = errors.New("insert scrapbook failed")
+	ErrBadScrapbookName = errors.New("bad scrapbook name")
 )
 
 type RegisterInput struct {
@@ -42,6 +43,14 @@ func (db *DB) Register(ctx context.Context, inp RegisterInput) error {
 	}
 	query = `INSERT INTO user_credentials (user_id, credential_type, credential_id) VALUES ($1, $2, $3)`
 	if _, err := tx.ExecContext(ctx, query, inp.UserID, inp.CredentialType, inp.CredentialID); err != nil {
+		return err
+	}
+	query = `INSERT INTO scrapbooks (id, user_id, name, is_default, created_at) VALUES ($1, $2, $3, $4, $5)`
+	scrapbookID, err := internal.NewID()
+	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, query, scrapbookID, inp.UserID, internal.DefaultScrapbookName, true, inp.CreatedAt); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -210,7 +219,7 @@ func (db *DB) InsertMessage(ctx context.Context, userID string, inp internal.Mes
 }
 
 func (db *DB) SelectMyScrapbooks(ctx context.Context, userID string) ([]internal.Scrapbook, error) {
-	query := `SELECT id, name, created_at FROM scrapbooks WHERE user_id = $1 ORDER BY created_at ASC`
+	query := `SELECT id, name, is_default, created_at FROM scrapbooks WHERE user_id = $1 ORDER BY created_at ASC`
 	rows, err := db.db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
@@ -220,7 +229,7 @@ func (db *DB) SelectMyScrapbooks(ctx context.Context, userID string) ([]internal
 	var scrapbooks []internal.Scrapbook
 	for rows.Next() {
 		var scrapbook internal.Scrapbook
-		if err := rows.Scan(&scrapbook.ID, &scrapbook.Name, &scrapbook.CreatedAt); err != nil {
+		if err := rows.Scan(&scrapbook.ID, &scrapbook.Name, &scrapbook.IsDefault, &scrapbook.CreatedAt); err != nil {
 			return nil, err
 		}
 		scrapbooks = append(scrapbooks, scrapbook)
@@ -243,7 +252,7 @@ func (db *DB) InsertScrapbook(ctx context.Context, userID string, inp internal.S
 }
 
 func (db *DB) DeleteScrapbook(ctx context.Context, userID, scrapbookID string) error {
-	query := `DELETE FROM scrapbooks WHERE id = $1 AND user_id = $2`
+	query := `DELETE FROM scrapbooks WHERE id = $1 AND user_id = $2 AND is_default = false`
 	res, err := db.db.ExecContext(ctx, query, scrapbookID, userID)
 	if err != nil {
 		return err
@@ -257,7 +266,7 @@ func (db *DB) DeleteScrapbook(ctx context.Context, userID, scrapbookID string) e
 }
 
 func (db *DB) PatchScrapbook(ctx context.Context, userID, scrapbookID, name string) error {
-	query := `UPDATE scrapbooks SET name = $1 WHERE id = $2 AND user_id = $3`
+	query := `UPDATE scrapbooks SET name = $1 WHERE id = $2 AND user_id = $3 AND is_default = false`
 	res, err := db.db.ExecContext(ctx, query, name, scrapbookID, userID)
 	if err != nil {
 		return err

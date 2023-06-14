@@ -731,6 +731,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Hjejwerhj"
                 },
+                "isDefault": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "name": {
                     "type": "string",
                     "example": "basic"

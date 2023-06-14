@@ -35,6 +35,9 @@ definitions:
       id:
         example: Hjejwerhj
         type: string
+      isDefault:
+        example: true
+        type: boolean
       name:
         example: basic
         type: string
