@@ -43,10 +43,17 @@ create table if not exists scrapbooks(
 
 create table if not exists scraps(
     id text primary key,
-    scrapbook_id text references scrapbooks(id) on delete cascade not null,
     message_chat_id text not null,
     message_seq integer not null,
-    foreign key (message_chat_id, message_seq) references messages(chat_id, seq) on delete cascade,
+    memo text not null,
     created_at timestamptz not null default now(),
-    unique(scrapbook_id, message_chat_id, message_seq)
+    foreign key (message_chat_id, message_seq) references messages(chat_id, seq) on delete cascade,
+    unique(message_chat_id, message_seq)
+);
+
+create table if not exists scraps_scrapbooks(
+    scrap_id text references scraps(id) on delete cascade not null,
+    scrapbook_id text references scrapbooks(id) on delete cascade not null,
+    created_at timestamptz not null default now(),
+    primary key (scrap_id, scrapbook_id)
 );

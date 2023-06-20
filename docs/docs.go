@@ -642,11 +642,11 @@ const docTemplate = `{
                         "AccessTokenAuth": []
                     }
                 ],
-                "description": "Get my scraps in descending order of created_at",
+                "description": "get scraps on scrapbook",
                 "tags": [
                     "scraps"
                 ],
-                "summary": "Get my scraps",
+                "summary": "get scraps on scrapbook",
                 "parameters": [
                     {
                         "type": "string",
@@ -662,6 +662,223 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/server.scrapsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/scraps": {
+            "post": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "post new scrap, store in default scrapbook",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "post new scrap",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.postScrapBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/scraps/{scrapID}": {
+            "delete": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "delete scrap",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "delete scrap",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scrapID",
+                        "name": "scrapID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/scraps/{scrapID}/scrapbooks": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "get my scrapbooks on scrap",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "get my scrapbooks on scrap",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scrapID",
+                        "name": "scrapID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.scrapbooksResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/me/scraps/{scrapID}/scrapbooks/{scrapbookID}": {
+            "post": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "post scrap on scrapbook",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "post scrap on scrapbook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scrapID",
+                        "name": "scrapID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "scrapbookID",
+                        "name": "scrapbookID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "delete scrap on scrapbook",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "delete scrap on scrapbook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "scrapID",
+                        "name": "scrapID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "scrapbookID",
+                        "name": "scrapbookID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -717,6 +934,26 @@ const docTemplate = `{
                     "description": "seq starts from 1",
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "internal.Scrap": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2021-01-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "Hjejwerhj"
+                },
+                "memo": {
+                    "type": "string",
+                    "example": "hello"
+                },
+                "message": {
+                    "$ref": "#/definitions/internal.Message"
                 }
             }
         },
@@ -813,6 +1050,24 @@ const docTemplate = `{
                 }
             }
         },
+        "server.postScrapBody": {
+            "type": "object",
+            "required": [
+                "chatID",
+                "seq"
+            ],
+            "properties": {
+                "chatID": {
+                    "type": "string"
+                },
+                "memo": {
+                    "type": "string"
+                },
+                "seq": {
+                    "type": "integer"
+                }
+            }
+        },
         "server.scrapbookBody": {
             "type": "object",
             "properties": {
@@ -838,7 +1093,7 @@ const docTemplate = `{
                 "scraps": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal.Message"
+                        "$ref": "#/definitions/internal.Scrap"
                     }
                 }
             }

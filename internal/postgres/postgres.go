@@ -278,3 +278,134 @@ func (db *DB) PatchScrapbook(ctx context.Context, userID, scrapbookID, name stri
 	}
 	return nil
 }
+
+func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID string) ([]internal.Scrap, error) {
+	query := `SELECT s.id, s.memo, s.created_at, m.chat_id, m.seq, m.content, m.role, m.created_at
+		FROM scraps AS s
+		INNER JOIN messages AS m
+		ON s.id = m.scrap_id
+		INNER JOIN scrapbooks AS sb
+		ON s.scrapbook_id = sb.id
+		WHERE sb.user_id = $1 AND sb.id = $2
+		ORDER BY s.created_at DESC`
+	rows, err := db.db.QueryContext(ctx, query, userID, scrapbookID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var scraps []internal.Scrap
+	for rows.Next() {
+		var scrap internal.Scrap
+		var msg internal.Message
+		if err := rows.Scan(&scrap.ID, &scrap.Memo, &scrap.CreatedAt, &msg.ChatID, &msg.Seq, &msg.Content, &msg.Role, &msg.CreatedAt); err != nil {
+			return nil, err
+		}
+		scrap.Message = &msg
+		scraps = append(scraps, scrap)
+	}
+	return scraps, nil
+}
+
+func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap) error {
+	query := `INSERT INTO scraps (id, memo, created_at, message_chat_id, message_seq)
+		SELECT $1, $2, $3, $4, $5
+		FROM messages AS m
+		WHERE m.chat_id = $4 AND m.seq = $5 AND m.user_id = $6`
+	res, err := db.db.ExecContext(ctx, query, inp.ID, inp.Memo, inp.CreatedAt, inp.Message.ChatID, inp.Message.Seq, userID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
+	}
+	query = `INSERT INTO scraps_scrapbooks (scrap_id, scrapbook_id) 
+		SELECT $1, sb.id
+		FROM scrapbooks AS sb
+		WHERE sb.user_id = $2 AND sb.is_default = true`
+	res, err = db.db.ExecContext(ctx, query, inp.ID, userID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
+	}
+	return nil
+}
+
+func (db *DB) DeleteScrap(ctx context.Context, userID, scrapID string) error {
+	query := `DELETE FROM scraps 
+	WHERE id = $1 AND (SELECT m.user_id FROM messages AS m WHERE m.chat_id = s.message_chat_id AND m.seq = s.message_seq) = $2`
+	res, err := db.db.ExecContext(ctx, query, scrapID, userID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
+	}
+	return nil
+}
+
+func (db *DB) SelectMyScrapbooksOnScrap(ctx context.Context, userID, scrapID string) ([]internal.Scrapbook, error) {
+	query := `SELECT sb.id, sb.name, sb.is_default, sb.created_at
+		FROM scrapbooks AS sb
+		INNER JOIN scraps_scrapbooks AS ss
+		ON sb.id = ss.scrapbook_id
+		INNER JOIN scraps AS s
+		ON ss.scrap_id = s.id
+		WHERE s.id = $1 AND sb.user_id = $2`
+	rows, err := db.db.QueryContext(ctx, query, scrapID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var scrapbooks []internal.Scrapbook
+	for rows.Next() {
+		var scrapbook internal.Scrapbook
+		if err := rows.Scan(&scrapbook.ID, &scrapbook.Name, &scrapbook.IsDefault, &scrapbook.CreatedAt); err != nil {
+			return nil, err
+		}
+		scrapbooks = append(scrapbooks, scrapbook)
+	}
+	return scrapbooks, nil
+}
+
+func (db *DB) InsertScrapOnScrapbook(ctx context.Context, userID, scrapID, scrapbookID string) error {
+	query := `INSERT INTO scraps_scrapbooks (scrap_id, scrapbook_id)
+		SELECT $1, $2
+		FROM scrapbooks AS sb
+		WHERE sb.user_id = $3 AND sb.id = $2`
+	res, err := db.db.ExecContext(ctx, query, scrapID, scrapbookID, userID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
+	}
+	return nil
+}
+
+func (db *DB) DeleteScrapOnScrapbook(ctx context.Context, userID, scrapID, scrapbookID string) error {
+	query := `DELETE FROM scraps_scrapbooks AS ss
+		WHERE ss.scrap_id = $1 AND ss.scrapbook_id = $2
+		AND (SELECT s.user_id FROM scraps AS s WHERE s.id = ss.scrap_id) = $3`
+	res, err := db.db.ExecContext(ctx, query, scrapID, scrapbookID, userID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err != nil {
+		return err
+	} else if n == 0 {
+		return ErrUnauthorized
+	}
+	return nil
+}

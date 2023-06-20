@@ -54,8 +54,21 @@ func (s *Scrapbook) Assign() error {
 }
 
 type Scrap struct {
-	Memo      string     `json:"memo" example:"hello"`
-	CreatedAt *time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
+	ID        string    `json:"id" example:"Hjejwerhj"`
+	Memo      string    `json:"memo" example:"hello"`
+	CreatedAt time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
+
+	Message *Message `json:"message,omitempty"`
+}
+
+func (s *Scrap) Assign() error {
+	id, err := NewID()
+	if err != nil {
+		return err
+	}
+	s.ID = id
+	s.CreatedAt = time.Now().UTC()
+	return nil
 }
 
 func NewID() (string, error) {
