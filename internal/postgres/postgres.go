@@ -188,7 +188,12 @@ func (db *DB) GetMyMessages(ctx context.Context, userID, chatID string) ([]*inte
 	if err != nil {
 		return nil, err
 	}
-	query := `SELECT chat_id, seq, content, role, created_at FROM messages WHERE chat_id = $1 ORDER BY seq DESC`
+	query := `SELECT m.chat_id, m.seq, m.content, m.role, m.created_at, COALESCE(s.id, ''), COALESCE(s.memo, ''), COALESCE(s.created_at, '')
+		FROM messages AS m
+		LEFT JOIN scraps AS s
+		ON s.message_chat_id = m.chat_id AND s.message_seq = m.seq
+		WHERE m.chat_id = $1
+		ORDER BY m.seq DESC`
 	rows, err := db.db.QueryContext(ctx, query, chatID)
 	if err != nil {
 		return nil, err
@@ -198,8 +203,12 @@ func (db *DB) GetMyMessages(ctx context.Context, userID, chatID string) ([]*inte
 	var messages []*internal.Message
 	for rows.Next() {
 		var msg internal.Message
-		if err := rows.Scan(&msg.ChatID, &msg.Seq, &msg.Content, &msg.Role, &msg.CreatedAt); err != nil {
+		var scrap internal.Scrap
+		if err := rows.Scan(&msg.ChatID, &msg.Seq, &msg.Content, &msg.Role, &msg.CreatedAt, &scrap.ID, &scrap.Memo, &scrap.CreatedAt); err != nil {
 			return nil, err
+		}
+		if scrap.ID != "" {
+			msg.Scrap = &scrap
 		}
 		messages = append(messages, &msg)
 	}
