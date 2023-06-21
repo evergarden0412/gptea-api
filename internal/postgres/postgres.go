@@ -188,7 +188,7 @@ func (db *DB) GetMyMessages(ctx context.Context, userID, chatID string) ([]*inte
 	if err != nil {
 		return nil, err
 	}
-	query := `SELECT m.chat_id, m.seq, m.content, m.role, m.created_at, COALESCE(s.id, ''), COALESCE(s.memo, ''), COALESCE(s.created_at, '')
+	query := `SELECT m.chat_id, m.seq, m.content, m.role, m.created_at, COALESCE(s.id, ''), COALESCE(s.memo, ''), COALESCE(s.created_at, '1970-01-01T00:00:00Z') 
 		FROM messages AS m
 		LEFT JOIN scraps AS s
 		ON s.message_chat_id = m.chat_id AND s.message_seq = m.seq
