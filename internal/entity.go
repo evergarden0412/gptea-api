@@ -32,6 +32,8 @@ type Message struct {
 	Content   string     `json:"content"`
 	Role      string     `json:"role"`
 	CreatedAt *time.Time `json:"createdAt"`
+
+	Scrap *Scrap `json:"scrap,omitempty"`
 }
 
 type Scrapbook struct {

@@ -56,6 +56,7 @@ Globals:
         DB_PORT: 5432
         DB_SECRET_ARN: !FindInMap [EnvMap, DBSecretARN, !Ref Env]
         HMAC_SECRET_ARN: !FindInMap [EnvMap, HMACSecretARN, !Ref Env]
+        OPENAI_API_SECRET_ARN: arn:aws:secretsmanager:ap-northeast-2:596852339475:secret:gptea/openai-z3cOzL
 Resources:
   GPTeaAPI:
     Type: AWS::Serverless::Api
@@ -69,11 +70,14 @@ Resources:
   GPTeaFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Timeout: 10
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !FindInMap [EnvMap, DBSecretARN, !Ref Env]
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !FindInMap [EnvMap, HMACSecretARN, !Ref Env]
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: arn:aws:secretsmanager:ap-northeast-2:596852339475:secret:gptea/openai-z3cOzL
         - AWSLambdaVPCAccessExecutionRole
       Events:
         ProxyAPIEvent:

@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kataras/golog"
 	_ "github.com/lib/pq"
+	"github.com/sashabaranov/go-openai"
 )
 
 var ginLambda *ginadapter.GinLambda
@@ -47,7 +48,10 @@ func main() {
 	}
 	defer db.Close()
 	postgresDB := postgres.New(db)
-	chatbot := chatbot.New(nil)
+	openAIClient := openai.NewClientWithConfig(openai.DefaultConfig(
+		cfg.OpenAIAPIKey,
+	))
+	chatbot := chatbot.New(openAIClient)
 	s := server.New(a, chatbot, postgresDB)
 	r := gin.Default()
 	corsCfg := cors.DefaultConfig()

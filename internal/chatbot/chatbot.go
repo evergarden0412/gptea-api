@@ -33,22 +33,23 @@ func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*intern
 		Role:      openai.ChatMessageRoleUser,
 	}
 
-	// messages := buildMessages(history, in)
-	// req := openai.ChatCompletionRequest{
-	// Model:     openai.GPT3Dot5Turbo,
-	// MaxTokens: 20,
-	// Messages:  messages,
-	// }
-	// resp, err := c.client.CreateChatCompletion(ctx, req)
-	// if err != nil {
-	// return nil, nil, err
-	// }
+	messages := buildMessages(history, in)
+	req := openai.ChatCompletionRequest{
+		Model:     openai.GPT3Dot5Turbo,
+		MaxTokens: 1000,
+		Messages:  messages,
+	}
+	resp, err := c.client.CreateChatCompletion(ctx, req)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	out = &internal.Message{
 		ChatID:    chatID,
 		Seq:       lastSeq + 2,
-		Content:   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+		Content:   resp.Choices[0].Message.Content,
 		CreatedAt: nowPtr,
-		Role:      openai.ChatMessageRoleAssistant,
+		Role:      resp.Choices[0].Message.Role,
 	}
 	return
 }

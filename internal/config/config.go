@@ -23,6 +23,8 @@ type Config struct {
 	DBPort          string
 	DBUser          string
 	DBPassword      string
+	OpenAIAPIKey    string
+	OpenAIAPIOrgID  string
 }
 
 type PostgresSecret struct {
@@ -33,6 +35,11 @@ type PostgresSecret struct {
 type HMACSecret struct {
 	AccessTokenKey  string `json:"accessTokenKey"`
 	RefreshTokenKey string `json:"refreshTokenKey"`
+}
+
+type OpenAIAPISecret struct {
+	Key            string `json:"key"`
+	OrganizationID string `json:"organizationID"`
 }
 
 func Init(ctx context.Context) (*Config, error) {
@@ -104,9 +111,29 @@ func Init(ctx context.Context) (*Config, error) {
 		return nil, err
 	}
 
+	openaiAPIKeyInput := &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(os.Getenv("OPENAI_API_SECRET_ARN")),
+	}
+	openaiAPIKeyOutput, err := secretsManager.GetSecretValue(openaiAPIKeyInput)
+	if err != nil {
+		return nil, err
+	}
+	var openAIAPIString string
+	if openaiAPIKeyOutput.SecretString != nil {
+		openAIAPIString = *openaiAPIKeyOutput.SecretString
+	} else {
+		openAIAPIString = string(openaiAPIKeyOutput.SecretBinary)
+	}
+	var openAIAPISecret OpenAIAPISecret
+	if err := json.Unmarshal([]byte(openAIAPIString), &openAIAPISecret); err != nil {
+		return nil, err
+	}
+
 	cfg.DBUser = postgresSecret.User
 	cfg.DBPassword = postgresSecret.Password
 	cfg.AccessTokenKey = hmacSecret.AccessTokenKey
 	cfg.RefreshTokenKey = hmacSecret.RefreshTokenKey
+	cfg.OpenAIAPIKey = openAIAPISecret.Key
+	cfg.OpenAIAPIOrgID = openAIAPISecret.OrganizationID
 	return cfg, nil
 }
