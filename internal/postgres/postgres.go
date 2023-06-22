@@ -293,8 +293,10 @@ func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID s
 		FROM scraps AS s
 		INNER JOIN messages AS m
 		ON s.message_chat_id = m.chat_id AND s.message_seq = m.seq 
+		INNER JOIN scarps_scrapbooks AS ss
+		ON s.id = ss.scrap_id
 		INNER JOIN scrapbooks AS sb
-		ON s.scrapbook_id = sb.id
+		ON ss.scrapbook_id = sb.id
 		WHERE sb.user_id = $1 AND sb.id = $2
 		ORDER BY s.created_at DESC`
 	rows, err := db.db.QueryContext(ctx, query, userID, scrapbookID)
