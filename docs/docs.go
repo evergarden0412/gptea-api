@@ -483,7 +483,7 @@ const docTemplate = `{
                 ],
                 "description": "Get my scrapbooks",
                 "tags": [
-                    "scraps"
+                    "scrapbooks"
                 ],
                 "summary": "Get my scrapbooks",
                 "responses": {
@@ -515,7 +515,7 @@ const docTemplate = `{
                 ],
                 "description": "post new scrapbook",
                 "tags": [
-                    "scraps"
+                    "scrapbooks"
                 ],
                 "summary": "post new scrapbook",
                 "parameters": [
@@ -557,7 +557,7 @@ const docTemplate = `{
                 ],
                 "description": "delete scrapbook",
                 "tags": [
-                    "scraps"
+                    "scrapbooks"
                 ],
                 "summary": "delete scrapbook",
                 "parameters": [
@@ -595,7 +595,7 @@ const docTemplate = `{
                 ],
                 "description": "patch scrapbook",
                 "tags": [
-                    "scraps"
+                    "scrapbooks"
                 ],
                 "summary": "patch scrapbook",
                 "parameters": [
@@ -929,6 +929,9 @@ const docTemplate = `{
                 },
                 "role": {
                     "type": "string"
+                },
+                "scrap": {
+                    "$ref": "#/definitions/internal.Scrap"
                 },
                 "seq": {
                     "description": "seq starts from 1",

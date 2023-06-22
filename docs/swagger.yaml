@@ -22,6 +22,8 @@ definitions:
         type: string
       role:
         type: string
+      scrap:
+        $ref: '#/definitions/internal.Scrap'
       seq:
         description: seq starts from 1
         example: 1
@@ -466,7 +468,7 @@ paths:
       - AccessTokenAuth: []
       summary: Get my scrapbooks
       tags:
-      - scraps
+      - scrapbooks
     post:
       description: post new scrapbook
       parameters:
@@ -491,7 +493,7 @@ paths:
       - AccessTokenAuth: []
       summary: post new scrapbook
       tags:
-      - scraps
+      - scrapbooks
   /me/scrapbooks/{scrapbookID}:
     delete:
       description: delete scrapbook
@@ -516,7 +518,7 @@ paths:
       - AccessTokenAuth: []
       summary: delete scrapbook
       tags:
-      - scraps
+      - scrapbooks
     patch:
       description: patch scrapbook
       parameters:
@@ -546,7 +548,7 @@ paths:
       - AccessTokenAuth: []
       summary: patch scrapbook
       tags:
-      - scraps
+      - scrapbooks
   /me/scrapbooks/{scrapbookID}/scraps:
     get:
       description: get scraps on scrapbook

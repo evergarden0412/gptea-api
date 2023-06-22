@@ -181,7 +181,7 @@ type scrapbooksResponse struct {
 //
 //	@summary Get my scrapbooks
 //	@description Get my scrapbooks
-//	@tags scraps
+//	@tags scrapbooks
 //	@security AccessTokenAuth
 //	@success 200 {object} scrapbooksResponse
 //	@failure 400 {object} errorResponse
@@ -212,7 +212,7 @@ type scrapbookBody struct {
 //
 //	@summary post new scrapbook
 //	@description post new scrapbook
-//	@tags scraps
+//	@tags scrapbooks
 //	@security AccessTokenAuth
 //	@param body body scrapbookBody true "body"
 //	@success 201
@@ -249,7 +249,7 @@ func (s *Server) handlePostMyScrapbook(ctx *gin.Context) {
 //
 //	@summary delete scrapbook
 //	@description delete scrapbook
-//	@tags scraps
+//	@tags scrapbooks
 //	@security AccessTokenAuth
 //	@param scrapbookID path string true "scrapbookID"
 //	@success 204
@@ -273,7 +273,7 @@ func (s *Server) handleDeleteMyScrapbook(ctx *gin.Context) {
 //
 //	@summary patch scrapbook
 //	@description patch scrapbook
-//	@tags scraps
+//	@tags scrapbooks
 //	@security AccessTokenAuth
 //	@param scrapbookID path string true "scrapbookID"
 //	@param body body scrapbookBody true "body"

@@ -475,7 +475,7 @@
                 ],
                 "description": "Get my scrapbooks",
                 "tags": [
-                    "scraps"
+                    "scrapbooks"
                 ],
                 "summary": "Get my scrapbooks",
                 "responses": {
@@ -507,7 +507,7 @@
                 ],
                 "description": "post new scrapbook",
                 "tags": [
-                    "scraps"
+                    "scrapbooks"
                 ],
                 "summary": "post new scrapbook",
                 "parameters": [
@@ -549,7 +549,7 @@
                 ],
                 "description": "delete scrapbook",
                 "tags": [
-                    "scraps"
+                    "scrapbooks"
                 ],
                 "summary": "delete scrapbook",
                 "parameters": [
@@ -587,7 +587,7 @@
                 ],
                 "description": "patch scrapbook",
                 "tags": [
-                    "scraps"
+                    "scrapbooks"
                 ],
                 "summary": "patch scrapbook",
                 "parameters": [
@@ -921,6 +921,9 @@
                 },
                 "role": {
                     "type": "string"
+                },
+                "scrap": {
+                    "$ref": "#/definitions/internal.Scrap"
                 },
                 "seq": {
                     "description": "seq starts from 1",
