@@ -51,7 +51,6 @@ type errorResponse struct {
 // @description type `{refresh_token}`
 func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRoutes) {
 	handle("GET", "/ping2", s.handlePing)
-	handle("POST", "/auth/cred/oauth/token")
 	handle("POST", "/auth/cred/register", s.handleRegister)
 	handle("POST", "/auth/cred/sign-in", s.handleSignIn)
 	handle("POST", "/auth/cred/logout", s.ensureUser, s.handleLogout)
@@ -79,8 +78,6 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("GET", "/me/scraps/:scrapID/scrapbooks", s.ensureUser, s.handleGetMyScrapbooksOnScrap)
 	handle("POST", "/me/scraps/:scrapID/scrapbooks/:scrapbookID", s.ensureUser, s.handlePostScrapOnScrapbook)
 	handle("DELETE", "/me/scraps/:scrapID/scrapbooks/:scrapbookID", s.ensureUser, s.handleDeleteScrapOnScrapbook)
-	handle("POST", "/me/scrapbooks/:scrapbookID/scraps", s.ensureUser)
-	handle("GET", "/me/scraps", s.ensureUser)
 	if os.Getenv("ENV") != "prod" {
 		handle("GET", "/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
