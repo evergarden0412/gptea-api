@@ -293,7 +293,7 @@ func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID s
 		FROM scraps AS s
 		INNER JOIN messages AS m
 		ON s.message_chat_id = m.chat_id AND s.message_seq = m.seq 
-		INNER JOIN scarps_scrapbooks AS ss
+		INNER JOIN scraps_scrapbooks AS ss 
 		ON s.id = ss.scrap_id
 		INNER JOIN scrapbooks AS sb
 		ON ss.scrapbook_id = sb.id
