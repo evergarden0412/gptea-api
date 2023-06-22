@@ -334,9 +334,10 @@ func (s *Server) handleGetScrapsOnScrapbook(ctx *gin.Context) {
 }
 
 type postScrapBody struct {
-	ChatID string `json:"chatID" binding:"required"`
-	Seq    int    `json:"seq" binding:"required"`
-	Memo   string `json:"memo"`
+	ChatID       string   `json:"chatID" binding:"required"`
+	Seq          int      `json:"seq" binding:"required"`
+	Memo         string   `json:"memo"`
+	ScrapbookIDs []string `json:"scrapbookIDs" binding:"required,min=1"`
 }
 
 // handlePostMyScrap godoc
@@ -371,7 +372,7 @@ func (s *Server) handlePostMyScrap(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		return
 	}
-	if err := s.db.InsertScrap(ctx, userID, scrap); err != nil {
+	if err := s.db.InsertScrap(ctx, userID, scrap, body.ScrapbookIDs); err != nil {
 		golog.Error("handlePostMyScrap: insert scrap: ", err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		return

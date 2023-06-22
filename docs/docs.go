@@ -1057,6 +1057,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "chatID",
+                "scrapbookIDs",
                 "seq"
             ],
             "properties": {
@@ -1065,6 +1066,13 @@ const docTemplate = `{
                 },
                 "memo": {
                     "type": "string"
+                },
+                "scrapbookIDs": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "seq": {
                     "type": "integer"

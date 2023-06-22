@@ -111,10 +111,16 @@ definitions:
         type: string
       memo:
         type: string
+      scrapbookIDs:
+        items:
+          type: string
+        minItems: 1
+        type: array
       seq:
         type: integer
     required:
     - chatID
+    - scrapbookIDs
     - seq
     type: object
   server.scrapbookBody:

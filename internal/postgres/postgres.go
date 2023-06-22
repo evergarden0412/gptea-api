@@ -316,13 +316,19 @@ func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID s
 	return scraps, nil
 }
 
-func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap) error {
+func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap, scrapbookIDs []string) error {
+	tx, err := db.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
 	query := `INSERT INTO scraps (id, memo, created_at, message_chat_id, message_seq)
 		SELECT $1, $2, $3, $4, $5
 		FROM messages AS m
 		INNER JOIN chats AS c ON m.chat_id = c.id
 		WHERE m.chat_id = $4 AND m.seq = $5 AND c.user_id = $6`
-	res, err := db.db.ExecContext(ctx, query, inp.ID, inp.Memo, inp.CreatedAt, inp.Message.ChatID, inp.Message.Seq, userID)
+	res, err := tx.ExecContext(ctx, query, inp.ID, inp.Memo, inp.CreatedAt, inp.Message.ChatID, inp.Message.Seq, userID)
 	if err != nil {
 		return err
 	}
@@ -331,20 +337,23 @@ func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap
 	} else if n == 0 {
 		return ErrUnauthorized
 	}
+
 	query = `INSERT INTO scraps_scrapbooks (scrap_id, scrapbook_id) 
-		SELECT $1, sb.id
+		SELECT $1, $2
 		FROM scrapbooks AS sb
-		WHERE sb.user_id = $2 AND sb.is_default = true`
-	res, err = db.db.ExecContext(ctx, query, inp.ID, userID)
-	if err != nil {
-		return err
+		WHERE sb.user_id = $3 AND sb.id = $2`
+	for _, scrapbookID := range scrapbookIDs {
+		res, err := tx.ExecContext(ctx, query, inp.ID, scrapbookID, userID)
+		if err != nil {
+			return err
+		}
+		if n, err := res.RowsAffected(); err != nil {
+			return err
+		} else if n == 0 {
+			return ErrUnauthorized
+		}
 	}
-	if n, err := res.RowsAffected(); err != nil {
-		return err
-	} else if n == 0 {
-		return ErrUnauthorized
-	}
-	return nil
+	return tx.Commit()
 }
 
 func (db *DB) DeleteScrap(ctx context.Context, userID, scrapID string) error {
