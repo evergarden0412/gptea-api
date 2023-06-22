@@ -316,6 +316,34 @@ func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID s
 	return scraps, nil
 }
 
+func (db *DB) SelectMyScraps(ctx context.Context, userID string) ([]internal.Scrap, error) {
+	query := `SELECT s.id, s.memo, s.created_at, m.chat_id, m.seq, m.content, m.role, m.created_at
+		FROM scraps AS s
+		INNER JOIN messages AS m
+		ON s.message_chat_id = m.chat_id AND s.message_seq = m.seq 
+		INNER JOIN chats AS c
+		ON m.chat_id = c.id
+		WHERE c.user_id = $1
+		ORDER BY s.created_at DESC`
+	rows, err := db.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var scraps []internal.Scrap
+	for rows.Next() {
+		var scrap internal.Scrap
+		var msg internal.Message
+		if err := rows.Scan(&scrap.ID, &scrap.Memo, &scrap.CreatedAt, &msg.ChatID, &msg.Seq, &msg.Content, &msg.Role, &msg.CreatedAt); err != nil {
+			return nil, err
+		}
+		scrap.Message = &msg
+		scraps = append(scraps, scrap)
+	}
+	return scraps, nil
+}
+
 func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap, scrapbookIDs []string) error {
 	tx, err := db.db.BeginTx(ctx, nil)
 	if err != nil {

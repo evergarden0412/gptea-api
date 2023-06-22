@@ -71,8 +71,9 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("POST", "/me/scrapbooks", s.ensureUser, s.handlePostMyScrapbook)
 	handle("DELETE", "/me/scrapbooks/:scrapbookID", s.ensureUser, s.handleDeleteMyScrapbook)
 	handle("PATCH", "/me/scrapbooks/:scrapbookID", s.ensureUser, s.handlePatchMyScrapbook)
-	handle("GET", "/me/scrapbooks/:scrapbookID/scraps", s.ensureUser, s.handleGetScrapsOnScrapbook)
 	// scrap
+	handle("GET", "/me/scrapbooks/:scrapbookID/scraps", s.ensureUser, s.handleGetScrapsOnScrapbook)
+	handle("GET", "/me/scraps", s.ensureUser, s.handleGetMyScraps)
 	handle("POST", "/me/scraps", s.ensureUser, s.handlePostMyScrap)
 	handle("DELETE", "/me/scraps/:scrapID", s.ensureUser, s.handleDeleteMyScrap)
 	handle("GET", "/me/scraps/:scrapID/scrapbooks", s.ensureUser, s.handleGetMyScrapbooksOnScrap)
@@ -338,6 +339,33 @@ type postScrapBody struct {
 	Seq          int      `json:"seq" binding:"required"`
 	Memo         string   `json:"memo"`
 	ScrapbookIDs []string `json:"scrapbookIDs" binding:"required,min=1"`
+}
+
+// handleGetMyScraps godoc
+//
+//	@summary get my scraps
+//	@description get all my scraps
+//	@tags scraps
+//	@security AccessTokenAuth
+//	@success 200 {object} scrapsResponse
+//	@failure 400 {object} errorResponse
+//	@failure 500 {object} errorResponse
+//	@router /me/scraps [get]
+func (s *Server) handleGetMyScraps(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+
+	scraps, err := s.db.SelectMyScraps(ctx, userID)
+	if err != nil {
+		golog.Error("handleGetMyScraps: select my scraps: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+
+	scrapsResp := make([]internal.Scrap, len(scraps))
+	for i, scrap := range scraps {
+		scrapsResp[i] = scrap
+	}
+	ctx.JSON(http.StatusOK, scrapsResponse{Scraps: scrapsResp})
 }
 
 // handlePostMyScrap godoc
