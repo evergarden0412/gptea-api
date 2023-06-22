@@ -292,7 +292,7 @@ func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID s
 	query := `SELECT s.id, s.memo, s.created_at, m.chat_id, m.seq, m.content, m.role, m.created_at
 		FROM scraps AS s
 		INNER JOIN messages AS m
-		ON s.id = m.scrap_id
+		ON s.message_chat_id = m.chat_id AND s.message_seq = m.seq 
 		INNER JOIN scrapbooks AS sb
 		ON s.scrapbook_id = sb.id
 		WHERE sb.user_id = $1 AND sb.id = $2
@@ -448,7 +448,7 @@ func (db *DB) InsertScrapOnScrapbook(ctx context.Context, userID, scrapID, scrap
 func (db *DB) DeleteScrapOnScrapbook(ctx context.Context, userID, scrapID, scrapbookID string) error {
 	query := `DELETE FROM scraps_scrapbooks AS ss
 		WHERE ss.scrap_id = $1 AND ss.scrapbook_id = $2
-		AND (SELECT s.user_id FROM scraps AS s WHERE s.id = ss.scrap_id) = $3`
+		AND EXISTS (SELECT 1 FROM scrapbooks AS sb WHERE sb.user_id = $3 AND sb.id = $2)`
 	res, err := db.db.ExecContext(ctx, query, scrapID, scrapbookID, userID)
 	if err != nil {
 		return err
