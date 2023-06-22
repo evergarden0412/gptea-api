@@ -320,7 +320,8 @@ func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap
 	query := `INSERT INTO scraps (id, memo, created_at, message_chat_id, message_seq)
 		SELECT $1, $2, $3, $4, $5
 		FROM messages AS m
-		WHERE m.chat_id = $4 AND m.seq = $5 AND m.user_id = $6`
+		INNER JOIN chats AS c ON m.chat_id = c.id
+		WHERE m.chat_id = $4 AND m.seq = $5 AND c.user_id = $6`
 	res, err := db.db.ExecContext(ctx, query, inp.ID, inp.Memo, inp.CreatedAt, inp.Message.ChatID, inp.Message.Seq, userID)
 	if err != nil {
 		return err
@@ -348,7 +349,11 @@ func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap
 
 func (db *DB) DeleteScrap(ctx context.Context, userID, scrapID string) error {
 	query := `DELETE FROM scraps 
-	WHERE id = $1 AND (SELECT m.user_id FROM messages AS m WHERE m.chat_id = s.message_chat_id AND m.seq = s.message_seq) = $2`
+		WHERE id = $1 AND 
+			(SELECT c.user_id FROM messages AS m
+			INNER JOIN chats AS c ON m.chat_id = c.id
+			WHERE m.chat_id = s.message_chat_id AND m.seq = s.message_seq) = $2`
+
 	res, err := db.db.ExecContext(ctx, query, scrapID, userID)
 	if err != nil {
 		return err
