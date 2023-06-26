@@ -387,8 +387,8 @@ func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap
 }
 
 func (db *DB) DeleteScrap(ctx context.Context, userID, scrapID string) error {
-	query := `DELETE FROM scraps 
-		WHERE id = $1 AND 
+	query := `DELETE FROM scraps as s
+		WHERE s.id = $1 AND 
 			(SELECT c.user_id FROM messages AS m
 			INNER JOIN chats AS c ON m.chat_id = c.id
 			WHERE m.chat_id = s.message_chat_id AND m.seq = s.message_seq) = $2`
