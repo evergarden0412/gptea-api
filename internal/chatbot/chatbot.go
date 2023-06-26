@@ -23,13 +23,11 @@ func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*intern
 	if len(history) != 0 {
 		lastSeq = history[0].Seq
 	}
-	now := time.Now().UTC()
-	nowPtr := &now
 	in = &internal.Message{
 		ChatID:    chatID,
 		Seq:       lastSeq + 1,
 		Content:   newmsg,
-		CreatedAt: nowPtr,
+		CreatedAt: time.Now().UTC(),
 		Role:      openai.ChatMessageRoleUser,
 	}
 
@@ -48,7 +46,7 @@ func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*intern
 		ChatID:    chatID,
 		Seq:       lastSeq + 2,
 		Content:   resp.Choices[0].Message.Content,
-		CreatedAt: nowPtr,
+		CreatedAt: time.Now().UTC(),
 		Role:      resp.Choices[0].Message.Role,
 	}
 	return

@@ -27,11 +27,11 @@ func NewChat() (*Chat, error) {
 
 // pk is (chat_id, seq)
 type Message struct {
-	ChatID    string     `json:"chatID" example:"Hjejwerhj"`
-	Seq       int        `json:"seq" example:"1"` // seq starts from 1
-	Content   string     `json:"content"`
-	Role      string     `json:"role"`
-	CreatedAt *time.Time `json:"createdAt"`
+	ChatID    string    `json:"chatID" example:"Hjejwerhj"`
+	Seq       int       `json:"seq" example:"1"` // seq starts from 1
+	Content   string    `json:"content"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"createdAt"`
 
 	Scrap *Scrap `json:"scrap,omitempty"`
 }
