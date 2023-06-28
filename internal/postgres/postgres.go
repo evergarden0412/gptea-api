@@ -261,8 +261,25 @@ func (db *DB) InsertScrapbook(ctx context.Context, userID string, inp internal.S
 }
 
 func (db *DB) DeleteScrapbook(ctx context.Context, userID, scrapbookID string) error {
-	query := `DELETE FROM scrapbooks WHERE id = $1 AND user_id = $2 AND is_default = false`
-	res, err := db.db.ExecContext(ctx, query, scrapbookID, userID)
+	tx, err := db.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	query := `
+		DELETE FROM scraps
+		WHERE id IN (
+			SELECT scrap_id FROM scraps_scrapbooks
+			WHERE scrapbook_id = $1
+			GROUP BY scrap_id
+			HAVING COUNT(scrapbook_id) = 1
+		)`
+	if _, err := tx.ExecContext(ctx, query, scrapbookID); err != nil {
+		return err
+	}
+
+	query = `DELETE FROM scrapbooks WHERE id = $1 AND user_id = $2 AND is_default = false`
+	res, err := tx.ExecContext(ctx, query, scrapbookID, userID)
 	if err != nil {
 		return err
 	}
@@ -271,7 +288,8 @@ func (db *DB) DeleteScrapbook(ctx context.Context, userID, scrapbookID string) e
 	} else if n == 0 {
 		return ErrUnauthorized
 	}
-	return nil
+
+	return tx.Commit()
 }
 
 func (db *DB) PatchScrapbook(ctx context.Context, userID, scrapbookID, name string) error {
