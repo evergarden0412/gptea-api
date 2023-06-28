@@ -88,7 +88,7 @@ func (s *Server) handlePing(c *gin.Context) {
 }
 
 type messagesResponse struct {
-	Messages []internal.Message `json:"messages"`
+	Messages []internal.MessageWithScrap `json:"messages"`
 }
 
 // handleGetMyMessages godoc
@@ -112,7 +112,7 @@ func (s *Server) handleGetMyMessages(ctx *gin.Context) {
 		return
 	}
 
-	messagesResp := make([]internal.Message, len(messages))
+	messagesResp := make([]internal.MessageWithScrap, len(messages))
 	for i, message := range messages {
 		messagesResp[i] = *message
 	}
@@ -299,7 +299,7 @@ func (s *Server) handlePatchMyScrapbook(ctx *gin.Context) {
 }
 
 type scrapsResponse struct {
-	Scraps []internal.Scrap `json:"scraps"`
+	Scraps []internal.ScrapWithMessage `json:"scraps"`
 }
 
 // handleGetScrapsOnScrapbook godoc
@@ -324,7 +324,7 @@ func (s *Server) handleGetScrapsOnScrapbook(ctx *gin.Context) {
 		return
 	}
 
-	scrapsResp := make([]internal.Scrap, len(scraps))
+	scrapsResp := make([]internal.ScrapWithMessage, len(scraps))
 	for i, scrap := range scraps {
 		scrapsResp[i] = scrap
 	}
@@ -358,7 +358,7 @@ func (s *Server) handleGetMyScraps(ctx *gin.Context) {
 		return
 	}
 
-	scrapsResp := make([]internal.Scrap, len(scraps))
+	scrapsResp := make([]internal.ScrapWithMessage, len(scraps))
 	for i, scrap := range scraps {
 		scrapsResp[i] = scrap
 	}
@@ -387,17 +387,17 @@ func (s *Server) handlePostMyScrap(ctx *gin.Context) {
 
 	scrap := internal.Scrap{
 		Memo: body.Memo,
-		Message: &internal.Message{
-			ChatID: body.ChatID,
-			Seq:    body.Seq,
-		},
+	}
+	msg := internal.Message{
+		ChatID: body.ChatID,
+		Seq:    body.Seq,
 	}
 	if err := scrap.Assign(); err != nil {
 		golog.Error("handlePostMyScrap: assign: ", err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		return
 	}
-	if err := s.db.InsertScrap(ctx, userID, scrap, body.ScrapbookIDs); err != nil {
+	if err := s.db.InsertScrap(ctx, userID, scrap, msg, body.ScrapbookIDs); err != nil {
 		golog.Error("handlePostMyScrap: insert scrap: ", err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		return

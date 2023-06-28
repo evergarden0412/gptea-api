@@ -32,6 +32,14 @@ type Message struct {
 	Content   string    `json:"content"`
 	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"createdAt"`
+}
+
+type MessageWithScrap struct {
+	ChatID    string    `json:"chatID" example:"Hjejwerhj"`
+	Seq       int       `json:"seq" example:"1"` // seq starts from 1
+	Content   string    `json:"content"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"createdAt"`
 
 	Scrap *Scrap `json:"scrap,omitempty"`
 }
@@ -59,8 +67,6 @@ type Scrap struct {
 	ID        string    `json:"id" example:"Hjejwerhj"`
 	Memo      string    `json:"memo" example:"hello"`
 	CreatedAt time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
-
-	Message *Message `json:"message,omitempty"`
 }
 
 func (s *Scrap) Assign() error {
@@ -71,6 +77,14 @@ func (s *Scrap) Assign() error {
 	s.ID = id
 	s.CreatedAt = time.Now().UTC()
 	return nil
+}
+
+type ScrapWithMessage struct {
+	ID        string    `json:"id" example:"Hjejwerhj"`
+	Memo      string    `json:"memo" example:"hello"`
+	CreatedAt time.Time `json:"createdAt" example:"2021-01-01T00:00:00Z"`
+
+	Message *Message `json:"message,omitempty"`
 }
 
 func NewID() (string, error) {

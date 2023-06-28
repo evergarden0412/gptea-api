@@ -679,6 +679,38 @@ const docTemplate = `{
             }
         },
         "/me/scraps": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "get all my scraps",
+                "tags": [
+                    "scraps"
+                ],
+                "summary": "get my scraps",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.scrapsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -930,6 +962,29 @@ const docTemplate = `{
                 "role": {
                     "type": "string"
                 },
+                "seq": {
+                    "description": "seq starts from 1",
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "internal.MessageWithScrap": {
+            "type": "object",
+            "properties": {
+                "chatID": {
+                    "type": "string",
+                    "example": "Hjejwerhj"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
                 "scrap": {
                     "$ref": "#/definitions/internal.Scrap"
                 },
@@ -941,6 +996,23 @@ const docTemplate = `{
             }
         },
         "internal.Scrap": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2021-01-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "Hjejwerhj"
+                },
+                "memo": {
+                    "type": "string",
+                    "example": "hello"
+                }
+            }
+        },
+        "internal.ScrapWithMessage": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1048,7 +1120,7 @@ const docTemplate = `{
                 "messages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal.Message"
+                        "$ref": "#/definitions/internal.MessageWithScrap"
                     }
                 }
             }
@@ -1104,7 +1176,7 @@ const docTemplate = `{
                 "scraps": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/internal.Scrap"
+                        "$ref": "#/definitions/internal.ScrapWithMessage"
                     }
                 }
             }

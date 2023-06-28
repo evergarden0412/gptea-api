@@ -22,6 +22,22 @@ definitions:
         type: string
       role:
         type: string
+      seq:
+        description: seq starts from 1
+        example: 1
+        type: integer
+    type: object
+  internal.MessageWithScrap:
+    properties:
+      chatID:
+        example: Hjejwerhj
+        type: string
+      content:
+        type: string
+      createdAt:
+        type: string
+      role:
+        type: string
       scrap:
         $ref: '#/definitions/internal.Scrap'
       seq:
@@ -30,6 +46,18 @@ definitions:
         type: integer
     type: object
   internal.Scrap:
+    properties:
+      createdAt:
+        example: "2021-01-01T00:00:00Z"
+        type: string
+      id:
+        example: Hjejwerhj
+        type: string
+      memo:
+        example: hello
+        type: string
+    type: object
+  internal.ScrapWithMessage:
     properties:
       createdAt:
         example: "2021-01-01T00:00:00Z"
@@ -102,7 +130,7 @@ definitions:
     properties:
       messages:
         items:
-          $ref: '#/definitions/internal.Message'
+          $ref: '#/definitions/internal.MessageWithScrap'
         type: array
     type: object
   server.postScrapBody:
@@ -139,7 +167,7 @@ definitions:
     properties:
       scraps:
         items:
-          $ref: '#/definitions/internal.Scrap'
+          $ref: '#/definitions/internal.ScrapWithMessage'
         type: array
     type: object
   server.signInHandlerOutput:
@@ -583,6 +611,26 @@ paths:
       tags:
       - scraps
   /me/scraps:
+    get:
+      description: get all my scraps
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.scrapsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: get my scraps
+      tags:
+      - scraps
     post:
       description: post new scrap, store in default scrapbook
       parameters:

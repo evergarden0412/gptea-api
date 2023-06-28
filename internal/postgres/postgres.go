@@ -183,7 +183,7 @@ func (db *DB) DeleteChat(ctx context.Context, userID, chatID string) error {
 	return nil
 }
 
-func (db *DB) GetMyMessages(ctx context.Context, userID, chatID string) ([]*internal.Message, error) {
+func (db *DB) GetMyMessages(ctx context.Context, userID, chatID string) ([]*internal.MessageWithScrap, error) {
 	_, err := db.SelectMyChat(ctx, userID, chatID)
 	if err != nil {
 		return nil, err
@@ -200,9 +200,9 @@ func (db *DB) GetMyMessages(ctx context.Context, userID, chatID string) ([]*inte
 	}
 	defer rows.Close()
 
-	var messages []*internal.Message
+	var messages []*internal.MessageWithScrap
 	for rows.Next() {
-		var msg internal.Message
+		var msg internal.MessageWithScrap
 		var scrap internal.Scrap
 		if err := rows.Scan(&msg.ChatID, &msg.Seq, &msg.Content, &msg.Role, &msg.CreatedAt, &scrap.ID, &scrap.Memo, &scrap.CreatedAt); err != nil {
 			return nil, err
@@ -288,7 +288,7 @@ func (db *DB) PatchScrapbook(ctx context.Context, userID, scrapbookID, name stri
 	return nil
 }
 
-func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID string) ([]internal.Scrap, error) {
+func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID string) ([]internal.ScrapWithMessage, error) {
 	query := `SELECT s.id, s.memo, s.created_at, m.chat_id, m.seq, m.content, m.role, m.created_at
 		FROM scraps AS s
 		INNER JOIN messages AS m
@@ -305,9 +305,9 @@ func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID s
 	}
 	defer rows.Close()
 
-	var scraps []internal.Scrap
+	var scraps []internal.ScrapWithMessage
 	for rows.Next() {
-		var scrap internal.Scrap
+		var scrap internal.ScrapWithMessage
 		var msg internal.Message
 		if err := rows.Scan(&scrap.ID, &scrap.Memo, &scrap.CreatedAt, &msg.ChatID, &msg.Seq, &msg.Content, &msg.Role, &msg.CreatedAt); err != nil {
 			return nil, err
@@ -318,7 +318,7 @@ func (db *DB) SelectScrapsOnScrapbook(ctx context.Context, userID, scrapbookID s
 	return scraps, nil
 }
 
-func (db *DB) SelectMyScraps(ctx context.Context, userID string) ([]internal.Scrap, error) {
+func (db *DB) SelectMyScraps(ctx context.Context, userID string) ([]internal.ScrapWithMessage, error) {
 	query := `SELECT s.id, s.memo, s.created_at, m.chat_id, m.seq, m.content, m.role, m.created_at
 		FROM scraps AS s
 		INNER JOIN messages AS m
@@ -333,9 +333,9 @@ func (db *DB) SelectMyScraps(ctx context.Context, userID string) ([]internal.Scr
 	}
 	defer rows.Close()
 
-	var scraps []internal.Scrap
+	var scraps []internal.ScrapWithMessage
 	for rows.Next() {
-		var scrap internal.Scrap
+		var scrap internal.ScrapWithMessage
 		var msg internal.Message
 		if err := rows.Scan(&scrap.ID, &scrap.Memo, &scrap.CreatedAt, &msg.ChatID, &msg.Seq, &msg.Content, &msg.Role, &msg.CreatedAt); err != nil {
 			return nil, err
@@ -346,7 +346,7 @@ func (db *DB) SelectMyScraps(ctx context.Context, userID string) ([]internal.Scr
 	return scraps, nil
 }
 
-func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap, scrapbookIDs []string) error {
+func (db *DB) InsertScrap(ctx context.Context, userID string, scrap internal.Scrap, msg internal.Message, scrapbookIDs []string) error {
 	tx, err := db.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -358,7 +358,7 @@ func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap
 		FROM messages AS m
 		INNER JOIN chats AS c ON m.chat_id = c.id
 		WHERE m.chat_id = $4 AND m.seq = $5 AND c.user_id = $6`
-	res, err := tx.ExecContext(ctx, query, inp.ID, inp.Memo, inp.CreatedAt, inp.Message.ChatID, inp.Message.Seq, userID)
+	res, err := tx.ExecContext(ctx, query, scrap.ID, scrap.Memo, scrap.CreatedAt, msg.ChatID, msg.Seq, userID)
 	if err != nil {
 		return err
 	}
@@ -373,7 +373,7 @@ func (db *DB) InsertScrap(ctx context.Context, userID string, inp internal.Scrap
 		FROM scrapbooks AS sb
 		WHERE sb.user_id = $3 AND sb.id = $2`
 	for _, scrapbookID := range scrapbookIDs {
-		res, err := tx.ExecContext(ctx, query, inp.ID, scrapbookID, userID)
+		res, err := tx.ExecContext(ctx, query, scrap.ID, scrapbookID, userID)
 		if err != nil {
 			return err
 		}

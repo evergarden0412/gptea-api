@@ -18,7 +18,7 @@ func New(client *openai.Client) *Chatbot {
 	}
 }
 
-func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*internal.Message, newmsg string) (in, out *internal.Message, err error) {
+func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*internal.MessageWithScrap, newmsg string) (in, out *internal.Message, err error) {
 	lastSeq := 0
 	if len(history) != 0 {
 		lastSeq = history[0].Seq
@@ -53,7 +53,7 @@ func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*intern
 }
 
 // assumes history is sorted in ascending time
-func buildMessages(history []*internal.Message, new *internal.Message) []openai.ChatCompletionMessage {
+func buildMessages(history []*internal.MessageWithScrap, new *internal.Message) []openai.ChatCompletionMessage {
 	var res []openai.ChatCompletionMessage
 	for _, hist := range history {
 		res = append(res, openai.ChatCompletionMessage{Role: hist.Role, Content: hist.Content})
