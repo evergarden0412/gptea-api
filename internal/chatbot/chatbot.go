@@ -33,7 +33,7 @@ func (c *Chatbot) SendChat(ctx context.Context, chatID string, history []*intern
 
 	messages := buildMessages(history, in)
 	req := openai.ChatCompletionRequest{
-		Model:     openai.GPT3Dot5Turbo,
+		Model:     openai.GPT3Dot5Turbo0613,
 		MaxTokens: 1000,
 		Messages:  messages,
 	}
