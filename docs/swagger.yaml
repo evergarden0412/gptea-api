@@ -177,17 +177,6 @@ definitions:
       refreshToken:
         type: string
     type: object
-  server.tokenResponse:
-    properties:
-      exp:
-        type: string
-      iat:
-        type: string
-      jti:
-        type: string
-      sub:
-        type: string
-    type: object
 host: api.gptea-test.keenranger.dev
 info:
   contact: {}
@@ -280,27 +269,6 @@ paths:
       summary: Refresh a token
       tags:
       - token
-  /auth/token/verify:
-    get:
-      description: Verify a accesstoken
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/server.tokenResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/server.errorResponse'
-      security:
-      - AccessTokenAuth: []
-      summary: Verify a token
-      tags:
-      - token
   /me:
     delete:
       description: Delete my account
@@ -387,6 +355,22 @@ paths:
       security:
       - AccessTokenAuth: []
       summary: Delete my chat
+      tags:
+      - chats
+    get:
+      description: Get my chat
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Chat'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Get my chat
       tags:
       - chats
     patch:
@@ -551,6 +535,26 @@ paths:
       security:
       - AccessTokenAuth: []
       summary: delete scrapbook
+      tags:
+      - scrapbooks
+    get:
+      description: Get my scrapbook
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal.Scrapbook'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.errorResponse'
+      security:
+      - AccessTokenAuth: []
+      summary: Get my scrapbook
       tags:
       - scrapbooks
     patch:

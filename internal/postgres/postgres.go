@@ -246,6 +246,20 @@ func (db *DB) SelectMyScrapbooks(ctx context.Context, userID string) ([]internal
 	return scrapbooks, nil
 }
 
+func (db *DB)SelectMyScrapbook(ctx context.Context, userID, scrapbookID string) (internal.Scrapbook, error) {
+	query := `SELECT id, user_id, name, is_default, created_at FROM scrapbooks WHERE id = $1`
+	var scrapbook internal.Scrapbook
+	var scrapbookUserID string
+	if err := db.db.QueryRowContext(ctx, query, scrapbookID).Scan(&scrapbook.ID, &scrapbookUserID, &scrapbook.Name, &scrapbook.IsDefault, &scrapbook.CreatedAt); err != nil {
+		return internal.Scrapbook{}, err
+	}
+	if scrapbookUserID != userID {
+		return internal.Scrapbook{}, ErrUnauthorized
+	}
+	return scrapbook, nil
+}
+
+
 func (db *DB) InsertScrapbook(ctx context.Context, userID string, inp internal.Scrapbook) error {
 	query := `INSERT INTO scrapbooks (id, user_id, name, created_at) VALUES ($1, $2, $3, $4)`
 	res, err := db.db.ExecContext(ctx, query, inp.ID, userID, inp.Name, inp.CreatedAt)

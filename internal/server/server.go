@@ -54,11 +54,11 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("POST", "/auth/cred/register", s.handleRegister)
 	handle("POST", "/auth/cred/sign-in", s.handleSignIn)
 	handle("POST", "/auth/cred/logout", s.ensureUser, s.handleLogout)
-	handle("GET", "/auth/token/verify", s.handleVerifyToken)
 	handle("POST", "/auth/token/refresh", s.handleRefreshToken)
 	handle("DELETE", "/me", s.ensureUser, s.handleDeleteMe)
 	// chat
 	handle("GET", "/me/chats", s.ensureUser, s.handleGetMyChats)
+	handle("GET", "/me/chats/:chatID", s.ensureUser, s.handleGetMyChat)
 	handle("POST", "/me/chats", s.ensureUser, s.handlePostMyChat)
 	handle("PATCH", "/me/chats/:chatID", s.ensureUser, s.handlePatchMyChat)
 	handle("DELETE", "/me/chats/:chatID", s.ensureUser, s.handleDeleteMyChat)
@@ -67,6 +67,7 @@ func (s *Server) Install(handle func(string, string, ...gin.HandlerFunc) gin.IRo
 	handle("POST", "/me/chats/:chatID/messages", s.ensureUser, s.handlePostMyMessage)
 	// scrapbook
 	handle("GET", "/me/scrapbooks", s.ensureUser, s.handleGetMyScrapbooks)
+	handle("GET", "/me/scrapbooks/:scrapbookID", s.ensureUser, s.handleGetMyScrapbook)
 	handle("POST", "/me/scrapbooks", s.ensureUser, s.handlePostMyScrapbook)
 	handle("DELETE", "/me/scrapbooks/:scrapbookID", s.ensureUser, s.handleDeleteMyScrapbook)
 	handle("PATCH", "/me/scrapbooks/:scrapbookID", s.ensureUser, s.handlePatchMyScrapbook)
@@ -202,6 +203,29 @@ func (s *Server) handleGetMyScrapbooks(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, scrapbooksResponse{Scrapbooks: scrapbooksResp})
 }
 
+// handleGetMyScrapbook godoc
+//
+//	@summary Get my scrapbook
+//	@description Get my scrapbook
+//	@tags scrapbooks
+//	@security AccessTokenAuth
+//	@success 200 {object} internal.Scrapbook 
+//	@failure 400 {object} errorResponse
+//	@failure 500 {object} errorResponse
+//	@router /me/scrapbooks/{scrapbookID} [get]
+func (s *Server) handleGetMyScrapbook(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+	scrapbookID := ctx.Param("scrapbookID")
+
+	scrapbook, err := s.db.SelectMyScrapbook(ctx, userID, scrapbookID)
+	if err != nil {
+		golog.Error("handleGetMyScrapbooks: select my scrapbooks: ", err)
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, scrapbook)
+}
 type scrapbookBody struct {
 	Name string `json:"name"`
 }

@@ -152,40 +152,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/token/verify": {
-            "get": {
-                "security": [
-                    {
-                        "AccessTokenAuth": []
-                    }
-                ],
-                "description": "Verify a accesstoken",
-                "tags": [
-                    "token"
-                ],
-                "summary": "Verify a token",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/server.tokenResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/server.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/me": {
             "delete": {
                 "security": [
@@ -283,6 +249,32 @@ const docTemplate = `{
             }
         },
         "/me/chats/{chatID}": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Get my chat",
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Get my chat",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal.Chat"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -549,6 +541,38 @@ const docTemplate = `{
             }
         },
         "/me/scrapbooks/{scrapbookID}": {
+            "get": {
+                "security": [
+                    {
+                        "AccessTokenAuth": []
+                    }
+                ],
+                "description": "Get my scrapbook",
+                "tags": [
+                    "scrapbooks"
+                ],
+                "summary": "Get my scrapbook",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal.Scrapbook"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.errorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -1188,23 +1212,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "server.tokenResponse": {
-            "type": "object",
-            "properties": {
-                "exp": {
-                    "type": "string"
-                },
-                "iat": {
-                    "type": "string"
-                },
-                "jti": {
-                    "type": "string"
-                },
-                "sub": {
                     "type": "string"
                 }
             }

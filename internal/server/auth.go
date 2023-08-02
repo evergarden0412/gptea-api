@@ -141,44 +141,6 @@ type tokenResponse struct {
 	Subject   string    `json:"sub,omitempty"`
 }
 
-// handleVerifyToken godoc
-// @Summary Verify a token
-// @Description Verify a accesstoken
-// @Security AccessTokenAuth
-// @Success 200 {object} tokenResponse
-// @Failure 400 {object} errorResponse
-// @Failure 500 {object} errorResponse
-// @Router /auth/token/verify [get]
-// @tags token
-func (s *Server) handleVerifyToken(ctx *gin.Context) {
-	var header tokenHeader
-	if err := ctx.ShouldBindHeader(&header); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
-		golog.Error("handleVerifyToken: bind header: ", err)
-		return
-	}
-	atStr, found := strings.CutPrefix(header.Authorization, "Bearer ")
-	if !found {
-		ctx.JSON(http.StatusBadRequest, errorResponse{Error: "no bearer prefix"})
-		golog.Error("handleVerifyToken: cut prefix: not found")
-		return
-	}
-
-	at, err := s.a.VerifyAccessToken(atStr)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
-		golog.Error("handleVerifyToken: verify access token: ", err)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, tokenResponse{
-		ExpiresAt: at.ExpiresAt.Time,
-		IssuedAt:  at.IssuedAt.Time,
-		ID:        at.ID,
-		Subject:   at.Subject,
-	})
-}
-
 // handleRefreshToken godoc
 // @Summary Refresh a token
 // @Description Refresh a token

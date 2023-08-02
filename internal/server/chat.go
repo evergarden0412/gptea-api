@@ -76,6 +76,27 @@ func (s *Server) handleGetMyChats(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, chatsResponse{Chats: chatsForResp})
 }
 
+// handleGetMyChat godoc
+// @summary Get my chat
+// @description Get my chat
+// @tags chats
+// @security AccessTokenAuth
+// @success 200 {object} internal.Chat 
+// @failure 500 {object} errorResponse
+// @router /me/chats/{chatID} [get]
+func (s *Server) handleGetMyChat(ctx *gin.Context) {
+	userID := ctx.GetString("userID")
+	chatID := ctx.Param("chatID")
+
+	chat, err := s.db.SelectMyChat(ctx, userID, chatID)
+	if err != nil { 
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		golog.Error("handleGetMyChats: select chats: ", err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, chat)
+}
 // handlePatchMyChat godoc
 // @summary Patch my chat
 // @description Patch my chat name
