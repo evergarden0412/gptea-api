@@ -246,7 +246,7 @@ func (db *DB) SelectMyScrapbooks(ctx context.Context, userID string) ([]internal
 	return scrapbooks, nil
 }
 
-func (db *DB)SelectMyScrapbook(ctx context.Context, userID, scrapbookID string) (internal.Scrapbook, error) {
+func (db *DB) SelectMyScrapbook(ctx context.Context, userID, scrapbookID string) (internal.Scrapbook, error) {
 	query := `SELECT id, user_id, name, is_default, created_at FROM scrapbooks WHERE id = $1`
 	var scrapbook internal.Scrapbook
 	var scrapbookUserID string

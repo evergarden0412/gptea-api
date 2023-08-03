@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"net/http"
 	"os"
 
@@ -211,6 +212,7 @@ func (s *Server) handleGetMyScrapbooks(ctx *gin.Context) {
 //	@security AccessTokenAuth
 //	@success 200 {object} internal.Scrapbook 
 //	@failure 400 {object} errorResponse
+// 	@failure 404 {object} errorResponse
 //	@failure 500 {object} errorResponse
 //	@router /me/scrapbooks/{scrapbookID} [get]
 func (s *Server) handleGetMyScrapbook(ctx *gin.Context) {
@@ -218,6 +220,11 @@ func (s *Server) handleGetMyScrapbook(ctx *gin.Context) {
 	scrapbookID := ctx.Param("scrapbookID")
 
 	scrapbook, err := s.db.SelectMyScrapbook(ctx, userID, scrapbookID)
+	if err == sql.ErrNoRows {
+		golog.Error("handleGetMyScrapbook: select my scrapbook: ", err)
+		ctx.JSON(http.StatusNotFound, errorResponse{Error: err.Error()})
+		return
+	}
 	if err != nil {
 		golog.Error("handleGetMyScrapbooks: select my scrapbooks: ", err)
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})

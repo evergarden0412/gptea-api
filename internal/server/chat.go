@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/evergarden0412/gptea-api/internal"
@@ -54,13 +55,15 @@ type chatsResponse struct {
 }
 
 // handleGetMyChats godoc
-// @Summary Get my chats
-// @Description Get my chats in descending order of created_at
-// @Security AccessTokenAuth
-// @Success 200 {object} chatsResponse
-// @Failure 500 {object} errorResponse
-// @Router /me/chats [get]
+// @summary Get my chats
+// @description Get my chats in descending order of created_at
 // @tags chats
+// @security AccessTokenAuth
+// @success 200 {object} chatsResponse
+// @failure 400 {object} errorResponse
+// @failure 401 {object} errorResponse
+// @failure 500 {object} errorResponse
+// @router /me/chats [get]
 func (s *Server) handleGetMyChats(ctx *gin.Context) {
 	userID := ctx.GetString("userID")
 
@@ -82,6 +85,9 @@ func (s *Server) handleGetMyChats(ctx *gin.Context) {
 // @tags chats
 // @security AccessTokenAuth
 // @success 200 {object} internal.Chat 
+// @failure 400 {object} errorResponse
+// @failure 401 {object} errorResponse
+// @failure 404 {object} errorResponse
 // @failure 500 {object} errorResponse
 // @router /me/chats/{chatID} [get]
 func (s *Server) handleGetMyChat(ctx *gin.Context) {
@@ -89,6 +95,11 @@ func (s *Server) handleGetMyChat(ctx *gin.Context) {
 	chatID := ctx.Param("chatID")
 
 	chat, err := s.db.SelectMyChat(ctx, userID, chatID)
+	if err == sql.ErrNoRows {
+		ctx.JSON(http.StatusNotFound, errorResponse{Error: err.Error()})
+		golog.Error("handleGetMyChat: select chat: ", err)
+		return
+	}
 	if err != nil { 
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		golog.Error("handleGetMyChats: select chats: ", err)
