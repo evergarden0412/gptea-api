@@ -18,9 +18,6 @@ Mappings:
     SubnetA:
       test: subnet-0488dd94a906b5fdd
       prod: subnet-03cf3dc17841e83db
-    SubnetC:
-      test: subnet-062b8cfc24b8e705c
-      prod: subnet-017cfeee9d976ae10
     Domain:
       test: api.gptea-test.keenranger.dev
       prod: api.gptea.keenranger.dev
@@ -45,7 +42,6 @@ Globals:
         - !FindInMap [FunctionMap, SG, !Ref Env]
       SubnetIds:
         - !FindInMap [FunctionMap, SubnetA, !Ref Env]
-        - !FindInMap [FunctionMap, SubnetC, !Ref Env]
     Environment:
       Variables:
         ENV: !Ref Env
