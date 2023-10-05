@@ -1,2 +1,2 @@
 # gptea-api
-gptea-infra
+[gptea-infra](https://github.com/evergarden0412/gptea-infra)
