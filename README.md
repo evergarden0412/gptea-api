@@ -1,1 +1,2 @@
-# gptea-server
+# gptea-api
+gptea-infra
